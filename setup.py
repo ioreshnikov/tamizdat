@@ -17,7 +17,9 @@ setup(
     author_email="oreshnikov.ivan@gmail.com",
 
     python_requirements=[],
-    install_requires=[],
+    install_requires=[
+        "peewee"
+    ],
     extra_requires=[],
 
     packages=find_packages(exclude=("tests",)),
