@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+
+import logging
+from argparse import ArgumentParser
+
+from tamizdat.index import Index
+from tamizdat.models import make_database
+
+
+parser = ArgumentParser()
+parser.add_argument(
+    "--database",
+    default="index.sqlite3",
+    help="Path to the catalog database",
+    type=str)
+
+subparsers = parser.add_subparsers(
+    dest="command",
+    help="sub-command help")
+
+parser_command_import = subparsers.add_parser(
+    "import",
+    help="import CSV catalog")
+parser_command_import.add_argument(
+    "catalog",
+    help="Path to the catalog",
+    type=str)
+
+parser_command_search = subparsers.add_parser(
+    "search",
+    help="find a book in the index")
+parser_command_search.add_argument(
+    "terms",
+    help="Search terms",
+    type=str)
+
+args = parser.parse_args()
+database = make_database(args.database)
+index = Index(database)
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)8s %(message)s")
+peewee_logger = logging.getLogger("peewee")
+peewee_logger.setLevel(logging.INFO)
+
+
+if args.command == "import":
+    with open(args.catalog) as catalog:
+        index.import_catalog(catalog)
+
+if args.command == "search":
+    books = index.search(args.terms)
+    for book in books:
+        print(book)
