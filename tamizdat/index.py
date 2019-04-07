@@ -1,6 +1,6 @@
 from io import IOBase
 import logging
-from typing import Tuple, List
+from typing import List, Optional, Tuple
 
 from .models import SqliteDatabase, Author, Book, BookAuthors, CardIndex, Card
 
@@ -193,3 +193,6 @@ class Index:
             .group_by(Book.book_id)
             .paginate(page_number, items_per_page))
         return list(books)
+
+    def get(self, book_id: int) -> Optional[Book]:
+        return Book.get_or_none(Book.book_id == book_id)

@@ -1,8 +1,8 @@
 from peewee import (
     Proxy, SqliteDatabase,
     Model, DeferredThroughModel,
-    AutoField, ForeignKeyField, ManyToManyField,
-    CharField, IntegerField)
+    AutoField, DeferredForeignKey, ForeignKeyField, ManyToManyField,
+    BooleanField, CharField, IntegerField, TextField)
 from playhouse.sqlite_ext import FTS5Model, SearchField
 
 
@@ -51,6 +51,14 @@ class Book(BaseModel):
         Author,
         backref="books",
         through_model=BookAuthorsDeferred)
+
+    augmented = BooleanField(null=True, default=False)
+    annotation = TextField(null=True)
+    cover_image = DeferredForeignKey("File", field="file_id", null=True)
+    ebook_djvu = DeferredForeignKey("File", field="file_id", null=True)
+    ebook_epub = DeferredForeignKey("File", field="file_id", null=True)
+    ebook_fb2 = DeferredForeignKey("File", field="file_id", null=True)
+    ebook_mobi = DeferredForeignKey("File", field="file_id", null=True)
 
     def __repr__(self):
         return "Book({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, ...)".format(
@@ -133,8 +141,16 @@ class CardIndex(FTS5Model):
         return repr(self)
 
 
+class File(BaseModel):
+    file_id = AutoField()
+
+    remote_url = CharField(null=True)
+    local_path = CharField(null=True)
+    telegram_id = CharField(null=True)
+
+
 def make_database(address: str = ":memory:") -> SqliteDatabase:
     database = SqliteDatabase(address)
     proxy.initialize(database)
-    database.create_tables([Author, Book, BookAuthors, Card, CardIndex])
+    database.create_tables([Author, Book, BookAuthors, Card, CardIndex, File])
     return database

@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from tamizdat.models import make_database, Author, Book, Card
+from tamizdat.models import make_database, Author, Book, Card, File
 
 from .fixtures import fake_author, fake_book, fake_card
 
@@ -68,3 +68,31 @@ class ModelTestCase(TestCase):
 
         card_selected = Card.get(Card.book_id, card_inserted.book_id)
         self.assertEqual(card_inserted, card_selected)
+
+    def test_create_file_and_incrementaly_update_it(self):
+        file_inserted = File()
+        self.assertEqual(file_inserted.save(), 1)
+
+        file_selected = File.get(File.file_id == file_inserted.file_id)
+        self.assertEqual(file_inserted, file_selected)
+
+        file_inserted.remote_url = "remote_url"
+        self.assertIsNone(file_selected.remote_url)
+        file_inserted.save()
+
+        file_selected = File.get(File.file_id == file_inserted.file_id)
+        self.assertEqual(file_inserted.remote_url, file_selected.remote_url)
+
+        file_inserted.local_path = "local_path"
+        self.assertIsNone(file_selected.local_path)
+        file_inserted.save()
+
+        file_selected = File.get(File.file_id == file_inserted.file_id)
+        self.assertEqual(file_inserted.remote_url, file_selected.remote_url)
+
+        file_inserted.telegram_id = "telegram_id"
+        self.assertIsNone(file_selected.telegram_id)
+        file_inserted.save()
+
+        file_selected = File.get(File.file_id == file_inserted.file_id)
+        self.assertEqual(file_inserted.telegram_id, file_selected.telegram_id)
