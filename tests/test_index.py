@@ -128,3 +128,15 @@ class IndexTestCase(TestCase):
         self.assertIsInstance(search_result, list)
         self.assertEqual(len(search_result), 1)
         self.assertEqual(search_result[0].title, random_title)
+
+    def test_simple_get(self):
+        cards = fake_cards(10)
+        catalog = store_catalog(CATALOG_PROPER_HEADER, cards)
+
+        self.catalog.import_catalog(catalog)
+        random_card = random.choice(cards)
+        random_id = random_card["book_id"]
+
+        search_results = self.catalog.get(random_id)
+        self.assertIsInstance(search_results, Book)
+        self.assertEqual(search_results.book_id, random_id)

@@ -18,7 +18,9 @@ setup(
 
     python_requirements=[],
     install_requires=[
-        "peewee"
+        "lxml",
+        "peewee",
+        "requests"
     ],
     extra_requires=[],
 
