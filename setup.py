@@ -18,14 +18,17 @@ setup(
 
     python_requirements=[],
     install_requires=[
+        "jinja2",
         "lxml",
+        "python-telegram-bot",
         "peewee",
-        "requests"
+        "requests",
+        "transliterate"
     ],
     extra_requires=[],
 
     packages=find_packages(exclude=("tests",)),
-    scripts=[],
+    scripts=["bin/tamizdat"],
     include_package_data=True,
 
     license="MIT",

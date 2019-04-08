@@ -4,8 +4,17 @@
 import logging
 from argparse import ArgumentParser
 
+from tamizdat.command import (
+    DownloadCommand,
+    BookInfoCommand,
+    SearchCommand)
 from tamizdat.index import Index
 from tamizdat.models import make_database
+from tamizdat.response import (
+    DownloadResponse,
+    BookInfoResponse,
+    SearchResponse)
+from tamizdat.telegram_bot import TelegramBot
 from tamizdat.website import Website
 
 
@@ -36,12 +45,28 @@ parser_command_search.add_argument(
     help="Search terms",
     type=str)
 
-parser_command_search = subparsers.add_parser(
+parser_command_info = subparsers.add_parser(
     "info",
     help="show book information")
-parser_command_search.add_argument(
+parser_command_info.add_argument(
     "book_id",
     help="Book id",
+    type=str)
+
+parser_command_download = subparsers.add_parser(
+    "download",
+    help="download ebook")
+parser_command_download.add_argument(
+    "book_id",
+    help="Book id",
+    type=str)
+
+parser_bot_start = subparsers.add_parser(
+    "bot",
+    help="start telegram bot")
+parser_bot_start.add_argument(
+    "token",
+    help="Bot token",
     type=str)
 
 
@@ -63,14 +88,17 @@ if args.command == "import":
         index.import_catalog(catalog)
 
 if args.command == "search":
-    books = index.search(args.terms)
-    for book in books:
-        print(book)
+    response = SearchCommand(index).execute(args.terms)
+    print(response)
 
 if args.command == "info":
-    book = index.get(args.book_id)
-    website.fetch_additional_info(book)
+    response = BookInfoCommand(index, website).execute(args.book_id)
+    print(response)
 
-    print(book.title)
-    print(book.annotation)
-    print(book.cover_image.remote_url)
+if args.command == "download":
+    response = DownloadCommand(index, website).execute(args.book_id)
+    print(response)
+
+if args.command == "bot":
+    bot = TelegramBot(args.token, index, website)
+    bot.serve()

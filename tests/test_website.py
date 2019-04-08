@@ -72,8 +72,20 @@ class WebsiteTestCase(TestCase):
         self.website._append_additional_info(book, info)
 
         self.assertIsNotNone(book.annotation)
+
         self.assertIsInstance(book.cover_image, File)
+        self.assertTrue(book.cover_image.remote_url.endswith(".jpg"))
+
         self.assertIsNone(book.ebook_djvu)
+
         self.assertIsInstance(book.ebook_epub, File)
+        self.assertTrue(book.ebook_epub.remote_url.endswith("/epub"))
+        self.assertTrue(book.ebook_epub.local_path.endswith(".epub"))
+
         self.assertIsInstance(book.ebook_fb2, File)
+        self.assertTrue(book.ebook_fb2.remote_url.endswith("/fb2"))
+        self.assertTrue(book.ebook_fb2.local_path.endswith(".fb2"))
+
         self.assertIsInstance(book.ebook_mobi, File)
+        self.assertTrue(book.ebook_mobi.remote_url.endswith("/mobi"))
+        self.assertTrue(book.ebook_mobi.local_path.endswith(".mobi"))
