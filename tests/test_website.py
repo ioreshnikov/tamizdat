@@ -23,12 +23,12 @@ class WebsiteTestCase(TestCase):
         self.website = Website(requests=MagicMock())
 
     def test_get_extension(self):
-        self.assertEqual(self.website.get_extension("/b/485688/djvu"), "djvu")
-        self.assertEqual(self.website.get_extension("/b/485688/epub"), "epub")
-        self.assertEqual(self.website.get_extension("/b/485688/fb2"), "fb2")
-        self.assertEqual(self.website.get_extension("/b/485688/mobi"), "mobi")
-        self.assertEqual(self.website.get_extension("/b/485688/pdf"), "pdf")
-        self.assertIsNone(self.website.get_extension("/b/485688/"))
+        self.assertEqual(self.website._get_extension("/b/485688/djvu"), "djvu")
+        self.assertEqual(self.website._get_extension("/b/485688/epub"), "epub")
+        self.assertEqual(self.website._get_extension("/b/485688/fb2"), "fb2")
+        self.assertEqual(self.website._get_extension("/b/485688/mobi"), "mobi")
+        self.assertEqual(self.website._get_extension("/b/485688/pdf"), "pdf")
+        self.assertIsNone(self.website._get_extension("/b/485688/"))
 
     def test_join_paragraph(self):
         sentences = [
@@ -38,13 +38,13 @@ class WebsiteTestCase(TestCase):
         expected = (
             "Все счастливые семьи похожи друг на друга, "
             "каждая несчастливая семья несчастлива по-своему.")
-        self.assertEqual(self.website.join_paragraph(sentences), expected)
+        self.assertEqual(self.website._join_paragraph(sentences), expected)
 
     def test_scraping_info_from_a_webpage(self):
         self.website.requests.head = mock_head
 
         page_source = read_saved_page("93872")
-        info = self.website.scrape_additional_info(page_source)
+        info = self.website._scrape_additional_info(page_source)
         annotation, cover, downloads = info
 
         self.assertIsNotNone(annotation)
@@ -57,7 +57,7 @@ class WebsiteTestCase(TestCase):
         self.website.requests.head = mock_head
 
         page_source = read_saved_page("93872")
-        info = self.website.scrape_additional_info(page_source)
+        info = self.website._scrape_additional_info(page_source)
 
         book = Book(book_id=93872, title="Трудно быть богом")
         book.save()
@@ -69,7 +69,7 @@ class WebsiteTestCase(TestCase):
         self.assertIsNone(book.ebook_fb2)
         self.assertIsNone(book.ebook_mobi)
 
-        self.website.append_additional_info(book, info)
+        self.website._append_additional_info(book, info)
 
         self.assertIsNotNone(book.annotation)
         self.assertIsInstance(book.cover_image, File)

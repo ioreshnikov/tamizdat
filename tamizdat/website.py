@@ -32,24 +32,24 @@ class Website:
         self.requests = requests
 
     @staticmethod
-    def get_extension(href: str) -> Optional[str]:
+    def _get_extension(href: str) -> Optional[str]:
         *_, extension = path.split(href)
         if extension in BOOK_EXTENSIONS:
             return extension
         return None
 
     @staticmethod
-    def join_paragraph(sentences: List[str]) -> str:
+    def _join_paragraph(sentences: List[str]) -> str:
         return " ".join([
             sentence.strip() for sentence in sentences
         ])
 
-    def url(self, relative_url: str) -> str:
+    def _url(self, relative_url: str) -> str:
         url = urljoin(self.baseurl, relative_url)
         response = self.requests.head(url, allow_redirects=True)
         return response.url
 
-    def scrape_additional_info(
+    def _scrape_additional_info(
         self, page_source: str
     ) -> Tuple[str, str, Dict[str, str]]:
         etree = html.fromstring(page_source)
@@ -59,23 +59,23 @@ class Website:
         download_links = etree.xpath(XPATH_DOWNLOAD_LINKS)
 
         annotation_text = (
-            self.join_paragraph(annotation_text)
+            self._join_paragraph(annotation_text)
             if annotation_text
             else None)
 
         cover_image_url = (
-            self.url(cover_image_url[0])
+            self._url(cover_image_url[0])
             if cover_image_url
             else None)
 
         download_links = {
-            self.get_extension(link): self.url(link)
+            self._get_extension(link): self._url(link)
             for link in download_links
         }
 
         return annotation_text, cover_image_url, download_links
 
-    def append_additional_info(
+    def _append_additional_info(
         self,
         book: Book,
         info: Tuple[str, str, Dict[str, str]]
@@ -117,8 +117,8 @@ class Website:
             "Fetching additional info for book_id={}"
             .format(book.book_id))
         with self.requests.get(url) as response:
-            info = self.scrape_additional_info(response.text)
-            self.append_additional_info(book, info)
+            info = self._scrape_additional_info(response.text)
+            self._append_additional_info(book, info)
 
         book.augmented = True
         book.save()
