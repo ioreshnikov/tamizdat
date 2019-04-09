@@ -15,11 +15,23 @@ def fake_words(nb_words):
     return " ".join(fake.words(nb_words))
 
 
+def fake_last_name():
+    return fake.last_name_male()
+
+
+def fake_first_name():
+    return fake.first_name_male()
+
+
+def fake_middle_name():
+    return fake.middle_name_male()
+
+
 def fake_author():
     return OrderedDict(
-        last_name=fake.last_name_male(),
-        first_name=fake.first_name_male(),
-        middle_name=fake.middle_name_male())
+        last_name=fake_last_name(),
+        first_name=fake_first_name(),
+        middle_name=fake_middle_name())
 
 
 def fake_book():

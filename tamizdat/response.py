@@ -20,6 +20,54 @@ class NotFoundResponse:
         update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
 
 
+class GetEmailResponse:
+    def __init__(self, user):
+        self.user = user
+
+    def __str__(self):
+        template = environment.get_template("get_email.md")
+        return template.render(user=self.user)
+
+    def serve(self, bot, update):
+        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+
+
+class SetEmailResponse:
+    def __init__(self, user):
+        self.user = user
+
+    def __str__(self):
+        template = environment.get_template("set_email.md")
+        return template.render(user=self.user)
+
+    def serve(self, bot, update):
+        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+
+
+class GetFormatResponse:
+    def __init__(self, user):
+        self.user = user
+
+    def __str__(self):
+        template = environment.get_template("get_format.md")
+        return template.render(user=self.user)
+
+    def serve(self, bot, update):
+        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+
+
+class SetFormatResponse:
+    def __init__(self, user):
+        self.user = user
+
+    def __str__(self):
+        template = environment.get_template("set_format.md")
+        return template.render(user=self.user)
+
+    def serve(self, bot, update):
+        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+
+
 class SearchResponse:
     def __init__(self, books):
         self.books = books

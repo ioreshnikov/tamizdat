@@ -1,8 +1,10 @@
 from unittest import TestCase
 
-from tamizdat.models import make_database, Author, Book, Card, File
+from tamizdat.models import make_database, Author, Book, Card, File, User
 
-from .fixtures import fake_author, fake_book, fake_card
+from .fixtures import (
+    fake_author, fake_book, fake_card,
+    fake_first_name, fake_last_name)
 
 
 class ModelTestCase(TestCase):
@@ -96,3 +98,14 @@ class ModelTestCase(TestCase):
 
         file_selected = File.get(File.file_id == file_inserted.file_id)
         self.assertEqual(file_inserted.telegram_id, file_selected.telegram_id)
+
+    def test_create_user(self):
+        user_inserted = User(
+            user_id=102030,
+            username="ioreshnikov",
+            first_name=fake_first_name(),
+            last_name=fake_last_name())
+        user_inserted.save()
+
+        user_selected = User.get(User.username == user_inserted.username)
+        self.assertEqual(user_inserted, user_selected)
