@@ -69,8 +69,9 @@ class Website:
             else None)
 
         download_links = {
-            self._get_extension(link): self._url(link)
+            self._get_extension(link): link
             for link in download_links
+            if self._get_extension(link)
         }
 
         return annotation_text, cover_image_url, download_links
@@ -98,7 +99,9 @@ class Website:
 
         for extension, url in download_links.items():
             logging.debug("Setting {} ebook".format(extension))
-            ebook = File(remote_url=cover_image_url)
+            ebook = File(
+                remote_url=url,
+                local_path="{}.{}".format(book.book_id, extension))
             ebook.save()
             setattr(book, "ebook_{}".format(extension), ebook)
 
@@ -116,9 +119,28 @@ class Website:
         logging.info(
             "Fetching additional info for book_id={}"
             .format(book.book_id))
+
         with self.requests.get(url) as response:
             info = self._scrape_additional_info(response.text)
             self._append_additional_info(book, info)
 
         book.augmented = True
         book.save()
+
+    def download(self, url: str, filename: str):
+        url = self._url(url)
+
+        logging.debug("Saving {} to {}".format(url, filename))
+        with requests.get(url) as response:
+            with open(filename, "wb") as fd:
+                fd.write(response.content)
+
+    def download_file(self, file_: File):
+        remote_url = file_.remote_url
+        local_path = file_.local_path
+
+        if not local_path or not path.exists(local_path):
+            logging.debug("We don't have the file on disk.")
+            self.download(remote_url, local_path)
+            logging.debug("File downloaded!")
+            file_.save()
