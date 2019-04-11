@@ -1,6 +1,7 @@
 from jinja2 import Environment, PackageLoader, select_autoescape
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.parsemode import ParseMode
+from transliterate import translit
 
 
 environment = Environment(
@@ -56,8 +57,9 @@ class BookInfoResponse:
 
 
 class DownloadResponse:
-    def __init__(self, ebook):
-        self.ebook = ebook
+    def __init__(self, book):
+        self.book = book
+        self.ebook = book.ebook_mobi
 
     def serve(self, bot, update):
         message = update.message
@@ -68,9 +70,11 @@ class DownloadResponse:
             return message.reply_document(
                 self.ebook.telegram_id)
 
+        template = environment.get_template("filename.md")
+        filename = translit(template.render(book=self.book), reversed=True)
         response = message.reply_document(
             document=open(self.ebook.local_path, "rb"),
-            filename=self.ebook.local_path,
+            filename=filename,
             timeout=60)
 
         self.ebook.telegram_id = response.document.file_id

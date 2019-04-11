@@ -182,7 +182,7 @@ class Index:
         self,
         term: str,
         page_number: int = 1,
-        items_per_page: int = 5
+        items_per_page: int = 10
     ) -> List[Book]:
         books = (
             Book

@@ -1,8 +1,6 @@
 import logging
 import os
 
-from transliterate import translit
-
 from .response import (
     NotFoundResponse,
     SearchResponse,
@@ -58,7 +56,7 @@ class DownloadCommand:
         ebook = book.ebook_mobi
         self.website.download_file(ebook)
 
-        return DownloadResponse(ebook)
+        return DownloadResponse(book)
 
     def handle_regexp(self, bot, update, groups):
         book_id, *_ = groups

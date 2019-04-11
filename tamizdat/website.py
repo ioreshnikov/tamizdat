@@ -45,9 +45,7 @@ class Website:
         ])
 
     def _url(self, relative_url: str) -> str:
-        url = urljoin(self.baseurl, relative_url)
-        response = self.requests.head(url, allow_redirects=True)
-        return response.url
+        return urljoin(self.baseurl, relative_url)
 
     def _scrape_additional_info(
         self, page_source: str

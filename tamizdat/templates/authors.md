@@ -4,6 +4,4 @@
 {% for author in book.authors[1:2] -%}
   , {% include "author.md" %}
 {% endfor %}
-{% if book.authors | length > 2 -%}
-  _ и другие_
-{%- endif %}
+{% if book.authors | length > 2 %} и другие{%- endif %}
