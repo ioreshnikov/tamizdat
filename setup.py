@@ -28,6 +28,9 @@ setup(
     extra_requires=[],
 
     packages=find_packages(exclude=("tests",)),
+    package_data={
+        "tamizdat": ["templates/*.md"]
+    },
     scripts=["bin/tamizdat"],
     include_package_data=True,
 
