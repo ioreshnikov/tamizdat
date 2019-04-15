@@ -1,13 +1,26 @@
 from telegram.ext import (
     Filters, Updater,
-    CallbackQueryHandler, MessageHandler, RegexHandler)
+    CallbackQueryHandler, CommandHandler, MessageHandler, RegexHandler)
 
-from .command import SearchCommand, BookInfoCommand, DownloadCommand
+from .command import (
+    SetEmailCommand, SetFormatCommand,
+    SearchCommand, BookInfoCommand,
+    DownloadCommand)
 
 
 class TelegramBot:
     def __init__(self, token, index, website):
         self.updater = Updater(token)
+        self.updater.dispatcher.add_handler(
+            CommandHandler(
+                "email",
+                callback=SetEmailCommand().handle_command,
+                pass_args=True))
+        self.updater.dispatcher.add_handler(
+            CommandHandler(
+                "format",
+                callback=SetFormatCommand().handle_command,
+                pass_args=True))
         self.updater.dispatcher.add_handler(
             MessageHandler(
                 filters=Filters.text,

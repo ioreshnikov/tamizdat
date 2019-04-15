@@ -149,8 +149,22 @@ class File(BaseModel):
     telegram_id = CharField(null=True)
 
 
+class User(BaseModel):
+    user_id = IntegerField()
+
+    username = CharField(null=True)
+    first_name = CharField(null=True)
+    last_name = CharField(null=True)
+
+    email = CharField(null=True)
+    format = CharField(null=True, default="mobi")
+
+
 def make_database(address: str = ":memory:") -> SqliteDatabase:
     database = SqliteDatabase(address)
     proxy.initialize(database)
-    database.create_tables([Author, Book, BookAuthors, Card, CardIndex, File])
+    database.create_tables([
+        Author, Book, BookAuthors,
+        Card, CardIndex,
+        File, User])
     return database
