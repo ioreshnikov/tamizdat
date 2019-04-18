@@ -127,3 +127,24 @@ class DownloadResponse:
 
         self.ebook.telegram_id = response.document.file_id
         self.ebook.save()
+
+
+class EmailSentResponse:
+    def __init__(self, user):
+        self.user = user
+
+    def __str__(self):
+        template = environment.get_template("email_sent.md")
+        return template.render(user=self.user)
+
+    def serve(self, bot, update):
+        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+
+
+class EmailFailedResponse:
+    def __str__(self):
+        template = environment.get_template("email_sent.md")
+        return template.render(user=self.user)
+
+    def serve(self, bot, update):
+        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)

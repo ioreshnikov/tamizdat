@@ -4,6 +4,8 @@ import os
 from .models import User
 from .response import (
     NotFoundResponse,
+    EmailSentResponse,
+    EmailFailedResponse,
     GetEmailResponse,
     SetEmailResponse,
     GetFormatResponse,
@@ -13,12 +15,12 @@ from .response import (
     DownloadResponse)
 
 
-def get_or_create_user(update):
-    user, _ = User.get_or_create(user_id=update.message.chat.id)
+def get_or_create_user(chat):
+    user, _ = User.get_or_create(user_id=chat.id)
 
     for attr in ("username", "first_name", "last_name"):
         stored_attr = getattr(user, attr)
-        update_attr = getattr(update.message.chat, attr)
+        update_attr = getattr(chat, attr)
         if stored_attr != update_attr:
             setattr(user, attr, update_attr)
 
@@ -42,7 +44,7 @@ class SetEmailCommand:
         return SetEmailResponse(user).serve(bot, update)
 
     def handle_command(self, bot, update, args):
-        user = get_or_create_user(update)
+        user = get_or_create_user(update.message.chat)
         if not args:
             self.get_email(bot, update, user)
         else:
@@ -66,7 +68,7 @@ class SetFormatCommand:
         return SetFormatResponse(user).serve(bot, update)
 
     def handle_command(self, bot, update, args):
-        user = get_or_create_user(update)
+        user = get_or_create_user(update.message.chat)
         if not args:
             self.get_format(bot, update, user)
         else:
@@ -126,4 +128,29 @@ class DownloadCommand:
     def handle_regexp(self, bot, update, groups):
         book_id, *_ = groups
         response = self.execute(book_id)
+        response.serve(bot, update)
+
+
+class EmailCommand:
+    def __init__(self, index, website, mailer):
+        self.index = index
+        self.website = website
+        self.mailer = mailer
+
+    def execute(self, book_id, user):
+        response = DownloadCommand(self.index, self.website).execute(book_id)
+        if isinstance(response, NotFoundResponse):
+            return response
+        book = self.index.get(book_id)
+        try:
+            self.mailer.send(book, user)
+        except Exception:
+            return EmailFailedResponse()
+        else:
+            return EmailSentResponse(user)
+
+    def handle_regexp(self, bot, update, groups):
+        book_id, *_ = groups
+        user = get_or_create_user(update.callback_query.message.chat)
+        response = self.execute(book_id, user=user)
         response.serve(bot, update)
