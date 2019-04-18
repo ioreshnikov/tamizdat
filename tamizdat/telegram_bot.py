@@ -5,11 +5,11 @@ from telegram.ext import (
 from .command import (
     SetEmailCommand, SetFormatCommand,
     SearchCommand, BookInfoCommand,
-    DownloadCommand)
+    DownloadCommand, EmailCommand)
 
 
 class TelegramBot:
-    def __init__(self, token, index, website):
+    def __init__(self, token, index, website, mailer):
         self.updater = Updater(token)
         self.updater.dispatcher.add_handler(
             CommandHandler(
@@ -34,11 +34,21 @@ class TelegramBot:
             RegexHandler(
                 pattern=r"^/download(\d+)",
                 callback=DownloadCommand(index, website).handle_regexp,
-                pass_groups=True))
+                pass_groups=True)),
         self.updater.dispatcher.add_handler(
             CallbackQueryHandler(
                 pattern=r"^/download(\d+)",
                 callback=DownloadCommand(index, website).handle_regexp,
+                pass_groups=True)),
+        self.updater.dispatcher.add_handler(
+            RegexHandler(
+                pattern=r"^/email(\d+)",
+                callback=EmailCommand(index, website, mailer).handle_regexp,
+                pass_groups=True)),
+        self.updater.dispatcher.add_handler(
+            CallbackQueryHandler(
+                pattern=r"^/email(\d+)",
+                callback=EmailCommand(index, website, mailer).handle_regexp,
                 pass_groups=True))
 
     def serve(self):
