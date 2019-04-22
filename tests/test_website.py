@@ -23,11 +23,9 @@ class WebsiteTestCase(TestCase):
         self.website = Website(requests=MagicMock())
 
     def test_get_extension(self):
-        self.assertEqual(self.website._get_extension("/b/485688/djvu"), "djvu")
         self.assertEqual(self.website._get_extension("/b/485688/epub"), "epub")
         self.assertEqual(self.website._get_extension("/b/485688/fb2"), "fb2")
         self.assertEqual(self.website._get_extension("/b/485688/mobi"), "mobi")
-        self.assertEqual(self.website._get_extension("/b/485688/pdf"), "pdf")
         self.assertIsNone(self.website._get_extension("/b/485688/"))
 
     def test_join_paragraph(self):
@@ -64,7 +62,6 @@ class WebsiteTestCase(TestCase):
 
         self.assertIsNone(book.annotation)
         self.assertIsNone(book.cover_image)
-        self.assertIsNone(book.ebook_djvu)
         self.assertIsNone(book.ebook_epub)
         self.assertIsNone(book.ebook_fb2)
         self.assertIsNone(book.ebook_mobi)
@@ -75,8 +72,6 @@ class WebsiteTestCase(TestCase):
 
         self.assertIsInstance(book.cover_image, File)
         self.assertTrue(book.cover_image.remote_url.endswith(".jpg"))
-
-        self.assertIsNone(book.ebook_djvu)
 
         self.assertIsInstance(book.ebook_epub, File)
         self.assertTrue(book.ebook_epub.remote_url.endswith("/epub"))

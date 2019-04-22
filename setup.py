@@ -21,6 +21,7 @@ setup(
         "jinja2",
         "lxml",
         "python-telegram-bot",
+        "py3-validate-email",
         "peewee",
         "requests",
         "transliterate"

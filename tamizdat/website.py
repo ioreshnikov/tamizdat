@@ -6,7 +6,7 @@ from urllib.parse import urljoin
 from lxml import html
 import requests
 
-from .models import Book, File
+from .models import BOOK_EXTENSION_CHOICES, Book, File
 
 
 XPATH_ANNOTATION_TEXT = "//h2[text()='Аннотация']/following-sibling::p//text()"
@@ -14,8 +14,6 @@ XPATH_ANNOTATION_TEXT = "//h2[text()='Аннотация']/following-sibling::p/
 XPATH_COVER_IMAGE_URL = "//img[@title='Cover image']/@src"
 
 XPATH_DOWNLOAD_LINKS = "//a[text()='(читать)']/following-sibling::a/@href"
-
-BOOK_EXTENSIONS = ["djvu", "epub", "fb2", "mobi", "pdf"]
 
 
 class Website:
@@ -34,7 +32,7 @@ class Website:
     @staticmethod
     def _get_extension(href: str) -> Optional[str]:
         *_, extension = path.split(href)
-        if extension in BOOK_EXTENSIONS:
+        if extension in BOOK_EXTENSION_CHOICES:
             return extension
         return None
 
