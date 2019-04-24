@@ -1,9 +1,21 @@
+from enum import Enum
+
 from peewee import (
     Proxy, SqliteDatabase,
     Model, DeferredThroughModel,
     AutoField, DeferredForeignKey, ForeignKeyField, ManyToManyField,
     BooleanField, CharField, IntegerField, TextField)
 from playhouse.sqlite_ext import FTS5Model, SearchField
+
+
+BOOK_EXTENSION_EPUB = "epub"
+BOOK_EXTENSION_FB2 = "fb2"
+BOOK_EXTENSION_MOBI = "mobi"
+
+BOOK_EXTENSION_CHOICES = (
+    BOOK_EXTENSION_EPUB,
+    BOOK_EXTENSION_FB2,
+    BOOK_EXTENSION_MOBI)
 
 
 proxy = Proxy()
@@ -156,8 +168,10 @@ class User(BaseModel):
     first_name = CharField(null=True)
     last_name = CharField(null=True)
 
+    next_message_is_email = BooleanField(default=False)
     email = CharField(null=True)
-    format = CharField(null=True, default="mobi")
+    extension = CharField(null=True, choices=BOOK_EXTENSION_CHOICES)
+
 
 
 def make_database(address: str = ":memory:") -> SqliteDatabase:

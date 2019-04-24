@@ -1,7 +1,17 @@
+import logging
+
 from jinja2 import Environment, PackageLoader, select_autoescape
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
 from telegram.parsemode import ParseMode
 from transliterate import translit
+
+from .models import BOOK_EXTENSION_CHOICES
+
+
+ICON_BOOK_PILE = "📚"
+ICON_ENVELOPE = "✉️"
+ICONS_BOOK_EXTENSIONS = ("📔", "📕", "📓")
+
 
 
 environment = Environment(
@@ -11,115 +21,153 @@ environment = Environment(
     trim_blocks=True)
 
 
-class NotFoundResponse:
+class Response:
+    template = None
+
+    def __init__(self):
+        self.template = environment.get_template(self.template)
+
     def __str__(self):
-        template = environment.get_template("not_found.md")
-        return template.render()
+        return self.template.render()
 
-    def serve(self, bot, update):
-        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+    def serve(self, bot, message):
+        return message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
 
 
-class GetEmailResponse:
+class NotFoundResponse(Response):
+    template = "not_found.md"
+
+
+class ProfileResponse(Response):
+    template = "profile.md"
+
     def __init__(self, user):
+        super().__init__()
         self.user = user
 
     def __str__(self):
-        template = environment.get_template("get_email.md")
-        return template.render(user=self.user)
+        return self.template.render(user=self.user).strip()
 
-    def serve(self, bot, update):
-        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
-
-
-class SetEmailResponse:
-    def __init__(self, user):
-        self.user = user
-
-    def __str__(self):
-        template = environment.get_template("set_email.md")
-        return template.render(user=self.user)
-
-    def serve(self, bot, update):
-        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
-
-
-class GetFormatResponse:
-    def __init__(self, user):
-        self.user = user
-
-    def __str__(self):
-        template = environment.get_template("get_format.md")
-        return template.render(user=self.user)
-
-    def serve(self, bot, update):
-        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
-
-
-class SetFormatResponse:
-    def __init__(self, user):
-        self.user = user
-
-    def __str__(self):
-        template = environment.get_template("set_format.md")
-        return template.render(user=self.user)
-
-    def serve(self, bot, update):
-        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
-
-
-class SearchResponse:
-    def __init__(self, books):
-        self.books = books
-
-    def __str__(self):
-        template = environment.get_template("search_results.md")
-        return template.render(books=self.books).strip()
-
-    def serve(self, bot, update):
-        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
-
-
-class BookInfoResponse:
-    def __init__(self, book):
-        self.book = book
-
-    def __str__(self):
-        template = environment.get_template("book_info.md")
-        return template.render(book=self.book).strip()
-
-    def serve(self, bot, update):
-        if self.book.cover_image:
-            update.message.reply_photo(self.book.cover_image.remote_url)
-        update.message.reply_text(
+    def serve(self, bot, message):
+        message.reply_text(
             str(self),
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([[
                 InlineKeyboardButton(
-                    "📦 Скачать",
+                    "{} Выбрать формат".format(ICON_BOOK_PILE),
+                    callback_data="/setextension"),
+                InlineKeyboardButton(
+                    "{} Указать адрес".format(ICON_ENVELOPE),
+                    callback_data="/setemail")
+            ]]))
+
+
+class ProfileExtensionChooseResponse(Response):
+    template = "profile_extension_choose.md"
+
+    def serve(self, bot, message):
+        buttons = zip(ICONS_BOOK_EXTENSIONS, BOOK_EXTENSION_CHOICES)
+        message.reply_text(
+            str(self),
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton(
+                    "{} {}".format(icon, extension),
+                    callback_data="/setextension {}".format(extension))
+                for icon, extension in buttons
+            ]]))
+
+
+class ProfileExtensionSetResponse(Response):
+    template = "profile_extension_set.md"
+
+    def __init__(self, extension):
+        super().__init__()
+        self.extension = extension
+
+    def __str__(self):
+        return self.template.render(extension=self.extension)
+
+
+class ProfileEmailChooseResponse(Response):
+    template = "profile_email_choose.md"
+
+
+class ProfileEmailSetResponse(Response):
+    template = "profile_email_set.md"
+
+    def __init__(self, email):
+        super().__init__()
+        self.email = email
+
+    def __str__(self):
+        return self.template.render(email=self.email)
+
+
+class ProfileEmailInvalidResponse(Response):
+    template = "profile_email_invalid.md"
+
+
+class SearchResponse(Response):
+    template = "search_results.md"
+
+    def __init__(self, books):
+        super().__init__()
+        self.books = books
+
+    def __str__(self):
+        return self.template.render(books=self.books).strip()
+
+
+class BookInfoResponse(Response):
+    template = "book_info.md"
+
+    def __init__(self, book):
+        super().__init__()
+        self.book = book
+
+    def __str__(self):
+        return self.template.render(book=self.book).strip()
+
+    def serve(self, bot, message):
+        if self.book.cover_image:
+            try:
+                logging.debug(
+                    "Trying to send cover image {}"
+                    .format(self.book.cover_image.remote_url))
+                message.reply_photo(self.book.cover_image.remote_url)
+            except TelegramError as error:
+                logging.error(error, exc_info=True)
+
+        message.reply_text(
+            str(self),
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup([[
+                InlineKeyboardButton(
+                    "{} Скачать".format(ICON_BOOK_PILE),
                     callback_data="/download{}".format(self.book.book_id)),
                 InlineKeyboardButton(
-                    "✉ Почтой",
+                    "{} Почтой".format(ICON_ENVELOPE),
                     callback_data="/email{}".format(self.book.book_id))
             ]]))
 
 
-class DownloadResponse:
+class DownloadResponse(Response):
+    template = "filename.md"
+
     def __init__(self, book):
+        super().__init__()
         self.book = book
         self.ebook = book.ebook_mobi
 
-    def serve(self, bot, update):
-        message = update.message
-        if not message:
-            message = update.callback_query.message
-
+    def serve(self, bot, message):
         if self.ebook.telegram_id:
             return message.reply_document(
                 self.ebook.telegram_id)
 
-        template = environment.get_template("filename.md")
-        filename = translit(template.render(book=self.book), reversed=True)
+        filename = translit(
+            self.template.render(book=self.book),
+            reversed=True)
         response = message.reply_document(
             document=open(self.ebook.local_path, "rb"),
             filename=filename,
@@ -129,22 +177,23 @@ class DownloadResponse:
         self.ebook.save()
 
 
-class EmailSentResponse:
+class EmailSentResponse(Response):
+    template = "email_sent.md"
+
     def __init__(self, user):
+        super().__init__()
         self.user = user
 
     def __str__(self):
-        template = environment.get_template("email_sent.md")
-        return template.render(user=self.user)
-
-    def serve(self, bot, update):
-        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+        return self.template.render(user=self.user)
 
 
-class EmailFailedResponse:
+class EmailFailedResponse(Response):
+    template = "email_sent.md"
+
+    def __init__(self, user):
+        super().__init__()
+        self.user = user
+
     def __str__(self):
-        template = environment.get_template("email_sent.md")
-        return template.render(user=self.user)
-
-    def serve(self, bot, update):
-        update.message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+        return self.template.render(user=self.user)
