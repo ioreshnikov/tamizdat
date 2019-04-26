@@ -15,7 +15,7 @@ address.
 Installation
 ------------
 
-Please close the repository first. In order to install the bot from source you need to update the settings stored inside `tamizdat/settings.py` and then use
+Please clone the repository first. In order to install the bot from source you need to update the settings stored inside `tamizdat/settings.py` and then use
 
     $ pip install .
 
