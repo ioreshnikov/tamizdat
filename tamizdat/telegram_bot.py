@@ -3,7 +3,7 @@ from telegram.ext import (
     CallbackQueryHandler, CommandHandler, MessageHandler, RegexHandler)
 
 from .command import (
-    ProfileCommand, ProfileEmailChooseCommand, ProfileExtensionCommand,
+    SettingsCommand, SettingsEmailChooseCommand, SettingsExtensionCommand,
     MessageCommand, BookInfoCommand, DownloadCommand, EmailCommand)
 
 
@@ -16,19 +16,35 @@ class TelegramBot:
                 callback=MessageCommand(index).handle_message))
         self.updater.dispatcher.add_handler(
             CommandHandler(
-                "profile",
-                ProfileCommand().handle_command,
+                "settings",
+                SettingsCommand().handle_command,
+                pass_args=True))
+        self.updater.dispatcher.add_handler(
+            CommandHandler(
+                "setextension",
+                callback=SettingsExtensionCommand().handle_command,
                 pass_args=True))
         self.updater.dispatcher.add_handler(
             CallbackQueryHandler(
-                pattern=r"^/setextension(.*)",
-                callback=ProfileExtensionCommand().handle_callback_regex,
+                pattern=r"^/setextension (.*)",
+                callback=SettingsExtensionCommand().handle_callback_regex,
                 pass_groups=True))
+        self.updater.dispatcher.add_handler(
+            CommandHandler(
+                "setemail",
+                callback=SettingsEmailChooseCommand().handle_command,
+                pass_args=True))
         self.updater.dispatcher.add_handler(
             CallbackQueryHandler(
                 pattern=r"^/setemail",
-                callback=ProfileEmailChooseCommand().handle_callback_regex,
+                callback=SettingsEmailChooseCommand().handle_callback_regex,
                 pass_groups=True))
+        self.updater.dispatcher.add_handler(
+            CommandHandler(
+                "info",
+                callback=BookInfoCommand(
+                    index, website).handle_command,
+                pass_args=True))
         self.updater.dispatcher.add_handler(
             RegexHandler(
                 pattern=r"^/info(\d+)",
@@ -36,14 +52,26 @@ class TelegramBot:
                     index, website).handle_command_regex,
                 pass_groups=True))
         self.updater.dispatcher.add_handler(
+            CommandHandler(
+                "download",
+                callback=DownloadCommand(
+                    index, website).handle_command,
+                pass_args=True)),
+        self.updater.dispatcher.add_handler(
             CallbackQueryHandler(
-                pattern=r"^/download(\d+)",
+                pattern=r"^/download (\d+)",
                 callback=DownloadCommand(
                     index, website).handle_callback_regex,
                 pass_groups=True)),
         self.updater.dispatcher.add_handler(
+            CommandHandler(
+                "email",
+                callback=EmailCommand(
+                    index, website, mailer).handle_command,
+                pass_args=True))
+        self.updater.dispatcher.add_handler(
             CallbackQueryHandler(
-                pattern=r"^/email(\d+)",
+                pattern=r"^/email (\d+)",
                 callback=EmailCommand(
                     index, website, mailer).handle_callback_regex,
                 pass_groups=True))

@@ -6,12 +6,12 @@ from telegram.parsemode import ParseMode
 from transliterate import translit
 
 from .models import BOOK_EXTENSION_CHOICES
+from .settings import EMAIL_LOGIN
 
 
-ICON_BOOK_PILE = "📚"
-ICON_ENVELOPE = "✉️"
+ICON_BOOK_PILE = "📖"
+ICON_ENVELOPE = "✉"
 ICONS_BOOK_EXTENSIONS = ("📔", "📕", "📓")
-
 
 
 environment = Environment(
@@ -38,8 +38,8 @@ class NotFoundResponse(Response):
     template = "not_found.md"
 
 
-class ProfileResponse(Response):
-    template = "profile.md"
+class SettingsResponse(Response):
+    template = "settings.md"
 
     def __init__(self, user):
         super().__init__()
@@ -62,8 +62,8 @@ class ProfileResponse(Response):
             ]]))
 
 
-class ProfileExtensionChooseResponse(Response):
-    template = "profile_extension_choose.md"
+class SettingsExtensionChooseResponse(Response):
+    template = "settings_extension_choose.md"
 
     def serve(self, bot, message):
         buttons = zip(ICONS_BOOK_EXTENSIONS, BOOK_EXTENSION_CHOICES)
@@ -78,8 +78,8 @@ class ProfileExtensionChooseResponse(Response):
             ]]))
 
 
-class ProfileExtensionSetResponse(Response):
-    template = "profile_extension_set.md"
+class SettingsExtensionSetResponse(Response):
+    template = "settings_extension_set.md"
 
     def __init__(self, extension):
         super().__init__()
@@ -89,23 +89,23 @@ class ProfileExtensionSetResponse(Response):
         return self.template.render(extension=self.extension)
 
 
-class ProfileEmailChooseResponse(Response):
-    template = "profile_email_choose.md"
+class SettingsEmailChooseResponse(Response):
+    template = "settings_email_choose.md"
 
 
-class ProfileEmailSetResponse(Response):
-    template = "profile_email_set.md"
+class SettingsEmailSetResponse(Response):
+    template = "settings_email_set.md"
 
-    def __init__(self, email):
+    def __init__(self, user):
         super().__init__()
-        self.email = email
+        self.user = user
 
     def __str__(self):
-        return self.template.render(email=self.email)
+        return self.template.render(bot_email=EMAIL_LOGIN, user=self.user)
 
 
-class ProfileEmailInvalidResponse(Response):
-    template = "profile_email_invalid.md"
+class SettingsEmailInvalidResponse(Response):
+    template = "settings_email_invalid.md"
 
 
 class SearchResponse(Response):
@@ -145,10 +145,10 @@ class BookInfoResponse(Response):
             reply_markup=InlineKeyboardMarkup([[
                 InlineKeyboardButton(
                     "{} Скачать".format(ICON_BOOK_PILE),
-                    callback_data="/download{}".format(self.book.book_id)),
+                    callback_data="/download {}".format(self.book.book_id)),
                 InlineKeyboardButton(
                     "{} Почтой".format(ICON_ENVELOPE),
-                    callback_data="/email{}".format(self.book.book_id))
+                    callback_data="/email {}".format(self.book.book_id))
             ]]))
 
 
@@ -189,7 +189,7 @@ class EmailSentResponse(Response):
 
 
 class EmailFailedResponse(Response):
-    template = "email_sent.md"
+    template = "email_failed.md"
 
     def __init__(self, user):
         super().__init__()

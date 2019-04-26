@@ -2,7 +2,7 @@ import logging
 
 from validate_email import validate_email
 
-from .models import User
+from .models import BOOK_EXTENSION_CHOICES, User
 from .response import (
     NotFoundResponse,
     EmailSentResponse,
@@ -10,12 +10,12 @@ from .response import (
     SearchResponse,
     BookInfoResponse,
     DownloadResponse,
-    ProfileResponse,
-    ProfileExtensionChooseResponse,
-    ProfileExtensionSetResponse,
-    ProfileEmailChooseResponse,
-    ProfileEmailSetResponse,
-    ProfileEmailInvalidResponse)
+    SettingsResponse,
+    SettingsExtensionChooseResponse,
+    SettingsExtensionSetResponse,
+    SettingsEmailChooseResponse,
+    SettingsEmailSetResponse,
+    SettingsEmailInvalidResponse)
 
 
 def get_or_create_user(chat):
@@ -60,45 +60,45 @@ class Command:
         return response.serve(bot, message)
 
 
-class ProfileCommand(Command):
+class SettingsCommand(Command):
     def execute(self, bot, message, key=None):
         user = get_or_create_user(message.chat)
-        return ProfileResponse(user)
+        return SettingsResponse(user)
 
 
-class ProfileEmailChooseCommand(Command):
+class SettingsEmailChooseCommand(Command):
     def execute(self, bot, message):
         user = get_or_create_user(message.chat)
         user.next_message_is_email = True
         user.save()
 
-        return ProfileEmailChooseResponse()
+        return SettingsEmailChooseResponse()
 
 
-class ProfileEmailSetCommand(Command):
+class SettingsEmailSetCommand(Command):
     def execute(self, bot, message, email):
         if not validate_email(email):
-            return ProfileEmailInvalidResponse()
+            return SettingsEmailInvalidResponse()
 
         user = get_or_create_user(message.chat)
         user.email = email
         user.next_message_is_email = False
         user.save()
 
-        return ProfileEmailSetResponse(email)
+        return SettingsEmailSetResponse(user)
 
 
-class ProfileExtensionCommand(Command):
-    def execute(self, bot, message, extension):
-        if not extension:
-            return ProfileExtensionChooseResponse()
+class SettingsExtensionCommand(Command):
+    def execute(self, bot, message, extension=None):
+        if not extension or extension not in BOOK_EXTENSION_CHOICES:
+            return SettingsExtensionChooseResponse()
 
         user = get_or_create_user(message.chat)
         user.extension = extension
         user.next_message_is_email = False
         user.save()
 
-        return ProfileExtensionSetResponse(extension)
+        return SettingsExtensionSetResponse(extension)
 
 
 class SearchCommand(Command):
@@ -115,12 +115,12 @@ class SearchCommand(Command):
 class MessageCommand(Command):
     def __init__(self, index):
         self.search_command = SearchCommand(index)
-        self.profile_email_set_command = ProfileEmailSetCommand()
+        self.settings_email_set_command = SettingsEmailSetCommand()
 
     def execute(self, bot, message, text):
         user = get_or_create_user(message.chat)
         if user.next_message_is_email:
-            return self.profile_email_set_command.execute(bot, message, text)
+            return self.settings_email_set_command.execute(bot, message, text)
         else:
             return self.search_command.execute(bot, message, text)
 
@@ -149,6 +149,10 @@ class DownloadCommand(Command):
             return NotFoundResponse()
         logging.info("Asked for ebook for book_id={}".format(book_id))
 
+        user = get_or_create_user(message.chat)
+        if user.extension is None:
+            return SettingsExtensionCommand().execute(bot, message)
+
         ebook = book.ebook_mobi
         self.website.download_file(ebook)
 
@@ -168,10 +172,20 @@ class EmailCommand(Command):
             return response
 
         book = self.index.get(book_id)
+        if not book:
+            return NotFoundResponse()
+
         user = get_or_create_user(message.chat)
+        if user.extension is None:
+            return SettingsExtensionCommand().execute(bot, message)
+        if user.email is None:
+            return SettingsEmailChooseCommand().execute(bot, message)
+
         try:
             self.mailer.send(book, user)
-        except Exception:
+        except Exception as error:
+            logging.error(
+                "Failed sending email: {}".format(error), exc_info=True)
             return EmailFailedResponse(user)
         else:
             return EmailSentResponse(user)

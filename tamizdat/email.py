@@ -1,9 +1,7 @@
-import logging
-
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.utils import COMMASPACE, formatdate
+from email.utils import formatdate
 from os.path import basename
 from smtplib import SMTP_SSL
 
@@ -47,17 +45,9 @@ class Mailer:
 
     def send(self, book, user):
         message = self.prepare_message(book, user)
+        server = SMTP_SSL(self.host, self.port)
 
-        try:
-            server = SMTP_SSL(self.host, self.port)
-
-            raise ZeroDivisionError()
-
-            server.ehlo()
-            server.login(self.login, self.password)
-            server.sendmail(self.login, user.email, str(message))
-            server.close()
-        except Exception as error:
-            logging.error(
-                "Failed sending email: {}".format(error), exc_info=True)
-            raise
+        server.ehlo()
+        server.login(self.login, self.password)
+        server.sendmail(self.login, user.email, str(message))
+        server.close()

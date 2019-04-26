@@ -1,3 +1,0 @@
-Здравствуйте, {% if user.first_name or user.last_name %}{% if user.first_name %}{{ user.first_name }}{% endif %}{% if user.first_name and user.last_name %} {% endif %}{% if user.last_name %}{{ user.last_name }}{% endif %}{% else %}{{ user.username }}{% endif %}!
-
-{% if user.email %}Адрес вашей электронной почты `{{ user.email }}`{% else %}Мы не знаем ваш почтовый адрес{% endif %}. {% if user.extension %}Вы выбрали `{{ user.extension }}` как формат для скачивания{% else %}Вы не указали формат для скачивания книг{% endif %}. Чтобы поменять почтовый адрес или формат, пожалуйста, воспользуйтесь кнопками ниже.
