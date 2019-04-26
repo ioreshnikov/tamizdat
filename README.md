@@ -40,9 +40,9 @@ Supported commands
 
 Currently, the bot supports the following list of commands:
 
-* **settings** -- Show the profile settings ⚙
-* **setextension** -- Set preferred ebook extension 📖
-* **setemail** -- Set your email address 📬
-* **info** *000000* -- Show the book info given the id ℹ
-* **download** *000000* -- Download the ebook ☁
-* **email** *000000* -- Send the ebook via email ✉
+* **settings** -- Show the profile settings
+* **setextension** -- Set preferred ebook extension
+* **setemail** -- Set your email address
+* **info** *000000* -- Show the book info given the id
+* **download** *000000* -- Download the ebook
+* **email** *000000* -- Send the ebook via email
