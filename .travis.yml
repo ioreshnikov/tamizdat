@@ -1,0 +1,19 @@
+dist: xenial
+
+language: python
+python:
+  - "3.6"
+
+before_install:
+  - sudo add-apt-repository -y ppa:jonathonf/backports
+  - sudo apt-get update && sudo apt-get install sqlite3
+
+install:
+  - pip install .
+  - pip install codecov coverage faker nose rednose
+
+script:
+  - coverage run --source tamizdat -m nose --rednose -s -v tests
+
+after_success:
+  - codecov
