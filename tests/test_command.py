@@ -5,11 +5,16 @@ from faker import Faker
 
 from tamizdat.command import (
     get_or_create_user,
+    SettingsCommand,
+    SettingsEmailChooseCommand,
+    SettingsEmailSetCommand,
+    SettingsExtensionCommand,
     SearchCommand,
+    MessageCommand,
     BookInfoCommand,
     DownloadCommand,
     EmailCommand)
-from tamizdat.models import make_database, User
+from tamizdat.models import BOOK_EXTENSION_CHOICES, make_database, User
 
 
 fake = Faker()
@@ -57,6 +62,96 @@ class GetOrCreateUserTestCase(TestCase):
         self.assertEqual(user.last_name, self.chat.last_name)
 
 
+class SettingsCommandTestCase(TestCase):
+    def setUp(self):
+        self.bot = Mock()
+        self.update = Mock()
+
+        self.command = SettingsCommand()
+
+    @patch("tamizdat.command.get_or_create_user")
+    @patch("tamizdat.command.SettingsResponse")
+    def test_settings_command_returns_settings_reponse(self, MockResponse, get_or_create_user):
+        user = Mock()
+        get_or_create_user.return_value = user
+        self.command.handle_message(self.bot, self.update)
+        MockResponse(user).serve.assert_called_with(self.bot, self.update.message)
+
+
+class SettingsEmailChooseCommandTestCase(TestCase):
+    def setUp(self):
+        self.bot = Mock()
+        self.update = Mock()
+
+        self.command = SettingsEmailChooseCommand()
+
+    @patch("tamizdat.command.get_or_create_user")
+    @patch("tamizdat.command.SettingsEmailChooseResponse")
+    def test_email_choose_command_returns_correct_response_and_sets_the_flag(self, MockResponse, get_or_create_user):
+        user = Mock()
+        get_or_create_user.return_value = user
+        self.command.handle_command(self.bot, self.update, ())
+        self.assertTrue(user.next_message_is_email)
+        user.save.assert_called()
+        MockResponse().serve.assert_called_with(self.bot, self.update.message)
+
+
+class SettingsEmailSetCommandTestCase(TestCase):
+    def setUp(self):
+        self.bot = Mock()
+        self.update = Mock()
+
+        self.command = SettingsEmailSetCommand()
+
+    @patch("tamizdat.command.get_or_create_user")
+    @patch("tamizdat.command.SettingsEmailInvalidResponse")
+    def test_invalid_email_sends_the_invalid_response(self, MockResponse, mock_get_or_create_user):
+        self.update.message.text = fake.word()
+        self.command.handle_message(self.bot, self.update)
+        MockResponse().serve.assert_called_with(self.bot, self.update.message)
+
+    @patch("tamizdat.command.validate_email")
+    @patch("tamizdat.command.get_or_create_user")
+    @patch("tamizdat.command.SettingsEmailSetResponse")
+    def test_settings_email_drops_the_flag_and_sets_the_email(self, MockResponse, mock_get_or_create_user, validate_email):
+        user = Mock()
+        user.next_message_is_email = True
+        mock_get_or_create_user.return_value = user
+        validate_email.return_value = True
+
+        self.update.message.text = fake.email()
+        self.command.handle_message(self.bot, self.update)
+        self.assertFalse(user.next_message_is_email)
+        user.save.assert_called()
+
+
+class SettingsExtensionCommandTestCase(TestCase):
+    def setUp(self):
+        self.bot = Mock()
+        self.update = Mock()
+
+        self.command = SettingsExtensionCommand()
+
+    @patch("tamizdat.command.SettingsExtensionChooseResponse")
+    def test_setting_invalid_extension_asks_to_choose_again(self, MockResponse):
+        extension = fake.word()
+        self.command.handle_callback(self.bot, self.update, (extension, ))
+        MockResponse().serve.assert_called_with(self.bot, self.update.callback_query.message)
+
+    @patch("tamizdat.command.get_or_create_user")
+    @patch("tamizdat.command.SettingsExtensionSetResponse")
+    def test_setting_valid_extension_sets_extension(self, MockResponse, mock_get_or_create_user):
+        extension = fake.random.choice(BOOK_EXTENSION_CHOICES)
+        user = Mock()
+        user.next_message_is_email = True
+
+        mock_get_or_create_user.return_value = user
+        self.command.handle_callback(self.bot, self.update, (extension, ))
+
+        self.assertFalse(user.next_message_is_email)
+        MockResponse(extension).serve.assert_called_with(self.bot, self.update.callback_query.message)
+
+
 class SearchCommandTestCase(TestCase):
     def setUp(self):
         self.database = make_database()
@@ -84,6 +179,36 @@ class SearchCommandTestCase(TestCase):
         self.command.handle_message(self.bot, self.update)
 
         MockResponse().serve.assert_called_with(self.bot, self.update.message)
+
+
+class MessageCommandTestCase(TestCase):
+    def setUp(self):
+        self.index = Mock()
+
+        self.bot = Mock()
+        self.update = Mock()
+
+        with patch("tamizdat.command.SearchCommand") as MockSearchCommand, \
+             patch("tamizdat.command.SettingsEmailSetCommand") as MockSettingsEmailSetCommand:
+            self.command = MessageCommand(self.index)
+
+    @patch("tamizdat.command.get_or_create_user")
+    def test_if_flag_is_not_set_execute_search_command(self, mock_get_or_create_user):
+        user = Mock()
+        user.next_message_is_email = False
+        mock_get_or_create_user.return_value = user
+        self.command.handle_message(self.bot, self.update)
+        self.command.search_command.execute.assert_called_with(
+            self.bot, self.update.message, self.update.message.text)
+
+    @patch("tamizdat.command.get_or_create_user")
+    def test_if_flag_is_set_execute_set_email_command(self, mock_get_or_create_user):
+        user = Mock()
+        user.next_message_is_email = True
+        mock_get_or_create_user.return_value = user
+        self.command.handle_message(self.bot, self.update)
+        self.command.settings_email_set_command.execute.assert_called_with(
+            self.bot, self.update.message, self.update.message.text)
 
 
 class BookInfoCommandTestCase(TestCase):
@@ -204,6 +329,7 @@ class EmailCommandTestCase(TestCase):
     @patch("tamizdat.command.get_or_create_user")
     @patch("tamizdat.command.EmailSentResponse")
     def test_email_callback_sends_email_if_found(self, MockResponse, mock_get_or_create_user):
+        # The same as test_email_comamnd_sends_email_if_found, but with a callback.
         book_id = fake.random.randint(100, 1000000)
         book = Mock()
         user = Mock()
@@ -213,3 +339,30 @@ class EmailCommandTestCase(TestCase):
         self.command.handle_callback_regex(self.bot, self.update, (book_id, ))
         self.mailer.send.assert_called_with(book, user)
         MockResponse(user).serve.assert_called_with(self.bot, self.update.callback_query.message)
+
+    @patch("tamizdat.command.get_or_create_user")
+    @patch("tamizdat.command.SettingsExtensionChooseResponse")
+    def test_email_callback_asks_for_extension_if_none(self, MockResponse, mock_get_or_create_user):
+        book_id = fake.random.randint(100, 1000000)
+        book = Mock()
+        user = Mock()
+        user.extension = None
+        mock_get_or_create_user.return_value = user
+        self.index.get.return_value = book
+
+        self.command.handle_callback_regex(self.bot, self.update, (book_id, ))
+        MockResponse().serve.assert_called_with(self.bot, self.update.callback_query.message)
+
+    @patch("tamizdat.command.get_or_create_user")
+    @patch("tamizdat.command.SettingsEmailChooseResponse")
+    def test_email_callback_asks_for_email_if_none(self, MockResponse, mock_get_or_create_user):
+        book_id = fake.random.randint(100, 1000000)
+        book = Mock()
+        user = Mock()
+        user.extension = fake.random.choice(BOOK_EXTENSION_CHOICES)
+        user.email = None
+        mock_get_or_create_user.return_value = user
+        self.index.get.return_value = book
+
+        self.command.handle_callback_regex(self.bot, self.update, (book_id, ))
+        MockResponse().serve.assert_called_with(self.bot, self.update.callback_query.message)
