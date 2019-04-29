@@ -2,10 +2,12 @@ import logging
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
+from telegram.bot import Bot
+from telegram.message import Message
 from telegram.parsemode import ParseMode
 from transliterate import translit
 
-from .models import BOOK_EXTENSION_CHOICES
+from .models import BOOK_EXTENSION_CHOICES, Book, User
 from .settings import EMAIL_LOGIN
 
 
@@ -22,33 +24,33 @@ environment = Environment(
 
 
 class Response:
-    template = None
+    template_path = NotImplemented
 
     def __init__(self):
-        self.template = environment.get_template(self.template)
+        self.template = environment.get_template(self.template_path)
 
     def __str__(self):
         return self.template.render()
 
-    def serve(self, bot, message):
+    def serve(self, bot: Bot, message: Message) -> None:
         return message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
 
 
 class NotFoundResponse(Response):
-    template = "not_found.md"
+    template_path = "not_found.md"
 
 
 class SettingsResponse(Response):
-    template = "settings.md"
+    template_path = "settings.md"
 
-    def __init__(self, user):
+    def __init__(self, user: User):
         super().__init__()
         self.user = user
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.template.render(user=self.user).strip()
 
-    def serve(self, bot, message):
+    def serve(self, bot: Bot, message: Message) -> None:
         message.reply_text(
             str(self),
             parse_mode=ParseMode.MARKDOWN,
@@ -63,9 +65,9 @@ class SettingsResponse(Response):
 
 
 class SettingsExtensionChooseResponse(Response):
-    template = "settings_extension_choose.md"
+    template_path = "settings_extension_choose.md"
 
-    def serve(self, bot, message):
+    def serve(self, bot: Bot, message: Message) -> None:
         buttons = zip(ICONS_BOOK_EXTENSIONS, BOOK_EXTENSION_CHOICES)
         message.reply_text(
             str(self),
@@ -79,57 +81,57 @@ class SettingsExtensionChooseResponse(Response):
 
 
 class SettingsExtensionSetResponse(Response):
-    template = "settings_extension_set.md"
+    template_path = "settings_extension_set.md"
 
-    def __init__(self, extension):
+    def __init__(self, extension: str):
         super().__init__()
         self.extension = extension
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.template.render(extension=self.extension)
 
 
 class SettingsEmailChooseResponse(Response):
-    template = "settings_email_choose.md"
+    template_path = "settings_email_choose.md"
 
 
 class SettingsEmailSetResponse(Response):
-    template = "settings_email_set.md"
+    template_path = "settings_email_set.md"
 
-    def __init__(self, user):
+    def __init__(self, user: User):
         super().__init__()
         self.user = user
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.template.render(bot_email=EMAIL_LOGIN, user=self.user)
 
 
 class SettingsEmailInvalidResponse(Response):
-    template = "settings_email_invalid.md"
+    template_path = "settings_email_invalid.md"
 
 
 class SearchResponse(Response):
-    template = "search_results.md"
+    template_path = "search_results.md"
 
-    def __init__(self, books):
+    def __init__(self, books: Book):
         super().__init__()
         self.books = books
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.template.render(books=self.books).strip()
 
 
 class BookInfoResponse(Response):
-    template = "book_info.md"
+    template_path = "book_info.md"
 
-    def __init__(self, book):
+    def __init__(self, book: Book):
         super().__init__()
         self.book = book
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.template.render(book=self.book).strip()
 
-    def serve(self, bot, message):
+    def serve(self, bot: Bot, message: Message) -> None:
         if self.book.cover_image:
             try:
                 logging.debug(
@@ -153,9 +155,9 @@ class BookInfoResponse(Response):
 
 
 class DownloadResponse(Response):
-    template = "filename.md"
+    template_path = "filename.md"
 
-    def __init__(self, book):
+    def __init__(self, book: Book):
         super().__init__()
         self.book = book
         self.ebook = book.ebook_mobi
@@ -178,22 +180,22 @@ class DownloadResponse(Response):
 
 
 class EmailSentResponse(Response):
-    template = "email_sent.md"
+    template_path = "email_sent.md"
 
-    def __init__(self, user):
+    def __init__(self, user: User):
         super().__init__()
         self.user = user
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.template.render(user=self.user)
 
 
 class EmailFailedResponse(Response):
-    template = "email_failed.md"
+    template_path = "email_failed.md"
 
-    def __init__(self, user):
+    def __init__(self, user: User):
         super().__init__()
         self.user = user
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.template.render(user=self.user)

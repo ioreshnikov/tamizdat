@@ -59,6 +59,8 @@ class GetOrCreateUserTestCase(TestCase):
 
 class SearchCommandTestCase(TestCase):
     def setUp(self):
+        self.database = make_database()
+
         self.bot = Mock()
         self.update = Mock()
 
@@ -86,6 +88,8 @@ class SearchCommandTestCase(TestCase):
 
 class BookInfoCommandTestCase(TestCase):
     def setUp(self):
+        self.database = make_database()
+
         self.bot = Mock()
         self.update = Mock()
 
@@ -119,6 +123,8 @@ class BookInfoCommandTestCase(TestCase):
 
 class DownloadCommandTestCase(TestCase):
     def setUp(self):
+        self.database = make_database()
+
         self.bot = Mock(0)
         self.update = Mock()
 
@@ -126,8 +132,9 @@ class DownloadCommandTestCase(TestCase):
         self.website = Mock()
         self.command = DownloadCommand(self.index, self.website)
 
+    @patch("tamizdat.command.get_or_create_user")
     @patch("tamizdat.command.DownloadResponse")
-    def test_download_command_downloads_a_book_if_found(self, MockResponse):
+    def test_download_command_downloads_a_book_if_found(self, MockResponse, mock_get_or_create_user):
         book_id = fake.random.randint(100, 100000)
         book = Mock()
         self.index.get.return_value = book
@@ -136,25 +143,30 @@ class DownloadCommandTestCase(TestCase):
         self.website.download_file.assert_called_with(book.ebook_mobi)
         MockResponse(book).serve.assert_called_with(self.bot, self.update.message)
 
+    @patch("tamizdat.command.get_or_create_user")
     @patch("tamizdat.command.NotFoundResponse")
-    def test_download_command_returns_not_found_if_not_found(self, MockResponse):
+    def test_download_command_returns_not_found_if_not_found(self, MockResponse, mock_get_or_create_user):
         book_id = fake.random.randint(100, 100000)
         self.index.get.return_value = None
 
         self.command.handle_command_regex(self.bot, self.update, (book_id, ))
         MockResponse().serve.assert_called_with(self.bot, self.update.message)
 
+    @patch("tamizdat.command.get_or_create_user")
     @patch("tamizdat.command.DownloadResponse")
-    def test_download_callback_downloads_a_book_if_found(self, MockResponse):
+    def test_download_callback_downloads_a_book_if_found(self, MockResponse, mock_get_or_create_user):
         self.test_download_command_downloads_a_book_if_found()
 
+    @patch("tamizdat.command.get_or_create_user")
     @patch("tamizdat.command.NotFoundResponse")
-    def test_download_callback_returns_not_found_if_not_found(self, MockResponse):
+    def test_download_callback_returns_not_found_if_not_found(self, MockResponse, mock_get_or_create_user):
         self.test_download_command_returns_not_found_if_not_found()
 
 
 class EmailCommandTestCase(TestCase):
     def setUp(self):
+        self.database = make_database()
+
         self.bot = Mock()
         self.update = Mock()
 

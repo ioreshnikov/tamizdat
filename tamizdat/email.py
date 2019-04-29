@@ -1,3 +1,5 @@
+from .models import Book, User
+
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -11,15 +13,17 @@ from tamizdat.response import environment
 class Mailer:
     def __init__(
         self,
-        login, password,
-        host="stmp.google.com", port=587,
+        login: str,
+        password: str,
+        host: str = "stmp.google.com",
+        port: int = 587,
     ):
         self.host = host
         self.port = port
         self.login = login
         self.password = password
 
-    def prepare_message(self, book, user):
+    def prepare_message(self, book: Book, user: User) -> MIMEMultipart:
         authors = environment.get_template("authors.md").render(book=book)
         title = book.title
         subject = "{}. {}".format(authors, title)
@@ -43,7 +47,7 @@ class Mailer:
 
         return message
 
-    def send(self, book, user):
+    def send(self, book: Book, user: User) -> None:
         message = self.prepare_message(book, user)
         server = SMTP_SSL(self.host, self.port)
 
