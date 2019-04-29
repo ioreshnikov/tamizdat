@@ -26,7 +26,7 @@ class TelegramBot:
                 pass_args=True))
         self.updater.dispatcher.add_handler(
             CallbackQueryHandler(
-                pattern=r"^/setextension (.*)",
+                pattern=r"^/setextension\s*(.*)",
                 callback=SettingsExtensionCommand().handle_callback_regex,
                 pass_groups=True))
         self.updater.dispatcher.add_handler(
