@@ -5,14 +5,9 @@ import logging
 from argparse import ArgumentParser
 
 from tamizdat import settings
-from tamizdat.command import (
-    DownloadCommand,
-    EmailCommand,
-    BookInfoCommand,
-    SearchCommand)
 from tamizdat.email import Mailer
 from tamizdat.index import Index
-from tamizdat.models import make_database
+from tamizdat.models import make_database, User
 from tamizdat.telegram_bot import TelegramBot
 from tamizdat.website import Website
 
@@ -36,6 +31,14 @@ parser_command_import.add_argument(
     help="Path to the catalog",
     type=str)
 
+parser_command_admin = subparsers.add_parser(
+    "admin",
+    help="Create administrator user")
+parser_command_admin.add_argument(
+    "user_id",
+    help="Telegram id",
+    type=int)
+
 parser_bot_start = subparsers.add_parser(
     "bot",
     help="start telegram bot")
@@ -48,7 +51,7 @@ website = Website()
 
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s %(levelname)8s %(message)s")
 peewee_logger = logging.getLogger("peewee")
 peewee_logger.setLevel(logging.INFO)
@@ -57,6 +60,14 @@ peewee_logger.setLevel(logging.INFO)
 if args.command == "import":
     with open(args.catalog) as catalog:
         index.import_catalog(catalog)
+
+if args.command == "admin":
+    user = User.get_or_none(user_id=args.user_id)
+    if not user:
+        user = User(user_id=args.user_id)
+    user.is_admin = True
+    user.is_authorized = True
+    user.save()
 
 if args.command == "bot":
     mailer = Mailer(

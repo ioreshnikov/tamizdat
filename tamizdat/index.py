@@ -1,8 +1,6 @@
-from io import IOBase
 import logging
-from typing import List, Optional, Tuple
 
-from .models import SqliteDatabase, Author, Book, BookAuthors, CardIndex, Card
+from .models import Author, Book, BookAuthors, CardIndex, Card
 
 
 CATALOG_CSV_COLUMNS = (
@@ -30,25 +28,25 @@ CATALOG_DB_COLUMNS = (
 
 
 class Index:
-    def __init__(self, database: SqliteDatabase):
+    def __init__(self, database):
         self.database = database
 
     @staticmethod
-    def _split_line(line: str) -> Tuple[str, ...]:
+    def _split_line(line):
         return tuple(
             column.strip()
             for column in line.split(";"))
 
     @staticmethod
-    def _proper_header(columns: Tuple[str, ...]) -> bool:
+    def _proper_header(columns):
         return list(columns) == list(CATALOG_CSV_COLUMNS)
 
     @staticmethod
-    def _proper_record(columns: Tuple[str, ...]) -> bool:
+    def _proper_record(columns):
         return len(columns) == len(CATALOG_CSV_COLUMNS)
 
     @staticmethod
-    def _prepare_card(columns: Tuple[str, ...]) -> Card:
+    def _prepare_card(columns):
         record = dict(zip(CATALOG_DB_COLUMNS, columns))
 
         try:
@@ -59,7 +57,7 @@ class Index:
         card = Card(**record)
         return card
 
-    def _import_cards(self, catalog: IOBase):
+    def _import_cards(self, catalog):
         logging.debug("Reading the catalog")
         header_line = next(catalog)
         header_columns = self._split_line(header_line)
@@ -170,7 +168,7 @@ class Index:
                 ]
             ).execute()
 
-    def import_catalog(self, catalog: IOBase):
+    def import_catalog(self, catalog):
         logging.info("Importing catalog")
         self._import_cards(catalog)
         self._prepare_authors()
@@ -178,12 +176,7 @@ class Index:
         self._prepare_card_index()
         logging.info("Importing done!")
 
-    def search(
-        self,
-        term: str,
-        page_number: int = 1,
-        items_per_page: int = 10
-    ) -> List[Book]:
+    def search(self, term, page_number=1, items_per_page=10):
         books = (
             Book
             .select(Book, Card, CardIndex)
@@ -194,5 +187,5 @@ class Index:
             .paginate(page_number, items_per_page))
         return list(books)
 
-    def get(self, book_id: int) -> Optional[Book]:
+    def get(self, book_id):
         return Book.get_or_none(Book.book_id == book_id)

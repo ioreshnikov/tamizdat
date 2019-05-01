@@ -34,7 +34,8 @@ class Mailer:
         message["Date"] = formatdate()
         message["Subject"] = subject
 
-        message.attach(MIMEText(book.annotation))
+        if book.annotation:
+            message.attach(MIMEText(book.annotation))
 
         ebook = book.ebook_mobi
         with open(ebook.local_path, "rb") as fd:

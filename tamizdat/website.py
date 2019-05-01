@@ -1,12 +1,11 @@
 import logging
 from os import path
-from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin
 
 from lxml import html
 import requests
 
-from .models import BOOK_EXTENSION_CHOICES, Book, File
+from .models import BOOK_EXTENSION_CHOICES, File
 
 
 XPATH_ANNOTATION_TEXT = "//h2[text()='Аннотация']/following-sibling::p//text()"
@@ -19,10 +18,10 @@ XPATH_DOWNLOAD_LINKS = "//a[text()='(читать)']/following-sibling::a/@href"
 class Website:
     def __init__(
         self,
-        baseurl: str = "http://flibusta.net",
-        book_url_format: str = "{baseurl}/b/{id}",
-        encoding: str = "utf-8",
-        requests: object = requests
+        baseurl="http://flibusta.net",
+        book_url_format="{baseurl}/b/{id}",
+        encoding="utf-8",
+        requests=requests
     ):
         self.baseurl = baseurl
         self.book_url_format = book_url_format
@@ -30,24 +29,22 @@ class Website:
         self.requests = requests
 
     @staticmethod
-    def _get_extension(href: str) -> Optional[str]:
+    def _get_extension(href):
         *_, extension = path.split(href)
         if extension in BOOK_EXTENSION_CHOICES:
             return extension
         return None
 
     @staticmethod
-    def _join_paragraph(sentences: List[str]) -> str:
+    def _join_paragraph(sentences):
         return " ".join([
             sentence.strip() for sentence in sentences
         ])
 
-    def _url(self, relative_url: str) -> str:
+    def _url(self, relative_url):
         return urljoin(self.baseurl, relative_url)
 
-    def _scrape_additional_info(
-        self, page_source: str
-    ) -> Tuple[str, str, Dict[str, str]]:
+    def _scrape_additional_info(self, page_source):
         etree = html.fromstring(page_source)
 
         annotation_text = etree.xpath(XPATH_ANNOTATION_TEXT)
@@ -72,11 +69,7 @@ class Website:
 
         return annotation_text, cover_image_url, download_links
 
-    def _append_additional_info(
-        self,
-        book: Book,
-        info: Tuple[str, str, Dict[str, str]]
-    ) -> Book:
+    def _append_additional_info(self, book, info):
         logging.info(
             "Appending additional info for book_id={}"
             .format(book.book_id))
@@ -101,7 +94,7 @@ class Website:
             ebook.save()
             setattr(book, "ebook_{}".format(extension), ebook)
 
-    def fetch_additional_info(self, book: Book) -> Book:
+    def fetch_additional_info(self, book):
         if book.augmented:
             logging.debug(
                 "Book has all the additional info. "
