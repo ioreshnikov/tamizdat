@@ -31,7 +31,7 @@ class Author(BaseModel):
         indexes = (
             (("last_name", "first_name", "middle_name"), True),)
 
-    author_id = AutoField(primary_key=True)
+    author_id = AutoField(primary_key=True, unique=True)
 
     last_name = CharField(null=True)
     first_name = CharField(null=True)
@@ -99,7 +99,7 @@ class Card(BaseModel):
             (("book_id",), False),
             (("last_name", "first_name", "middle_name"), False))
 
-    card_id = AutoField(primary_key=True)
+    card_id = AutoField(primary_key=True, unique=True)
 
     last_name = CharField(null=True)
     first_name = CharField(null=True)
@@ -162,16 +162,18 @@ class File(BaseModel):
 
 
 class User(BaseModel):
-    user_id = IntegerField()
+    user_id = IntegerField(unique=True)
 
     username = CharField(null=True)
     first_name = CharField(null=True)
     last_name = CharField(null=True)
 
+    is_admin = BooleanField(default=False)
+    is_authorized = BooleanField(default=False)
     next_message_is_email = BooleanField(default=False)
+
     email = CharField(null=True)
     extension = CharField(null=True, choices=BOOK_EXTENSION_CHOICES)
-
 
 
 def make_database(address: str = ":memory:") -> SqliteDatabase:

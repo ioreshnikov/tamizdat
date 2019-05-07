@@ -2,12 +2,10 @@ import logging
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
-from telegram.bot import Bot
-from telegram.message import Message
 from telegram.parsemode import ParseMode
 from transliterate import translit
 
-from .models import BOOK_EXTENSION_CHOICES, Book, User
+from .models import BOOK_EXTENSION_CHOICES, User
 from .settings import EMAIL_LOGIN
 
 
@@ -23,6 +21,11 @@ environment = Environment(
     trim_blocks=True)
 
 
+class NoResponse:
+    def serve(self, bot, message):
+        pass
+
+
 class Response:
     template_path = NotImplemented
 
@@ -32,25 +35,52 @@ class Response:
     def __str__(self):
         return self.template.render()
 
-    def serve(self, bot: Bot, message: Message) -> None:
+    def serve(self, bot, message):
         return message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
 
 
-class NotFoundResponse(Response):
-    template_path = "not_found.md"
+class UserNotFoundResponse(Response):
+    template_path = "user_not_found.md"
+
+
+class UserAuthorizedResponse(Response):
+    template_path = "user_authorized.md"
+
+
+class NewUserAdminNotification(Response):
+    template_path = "new_user.md"
+
+    def __init__(self, user):
+        super().__init__()
+        self.user = user
+
+    def __str__(self):
+        return self.template.render(user=self.user).strip()
+
+    def serve(self, bot, message):
+        admins = User.select().where(User.is_admin == True)
+        for admin in admins:
+            bot.send_message(
+                admin.user_id,
+                str(self),
+                parse_mode=ParseMode.MARKDOWN)
+
+
+class BookNotFoundResponse(Response):
+    template_path = "book_not_found.md"
 
 
 class SettingsResponse(Response):
     template_path = "settings.md"
 
-    def __init__(self, user: User):
+    def __init__(self, user):
         super().__init__()
         self.user = user
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.template.render(user=self.user).strip()
 
-    def serve(self, bot: Bot, message: Message) -> None:
+    def serve(self, bot, message):
         message.reply_text(
             str(self),
             parse_mode=ParseMode.MARKDOWN,
@@ -67,7 +97,7 @@ class SettingsResponse(Response):
 class SettingsExtensionChooseResponse(Response):
     template_path = "settings_extension_choose.md"
 
-    def serve(self, bot: Bot, message: Message) -> None:
+    def serve(self, bot, message):
         buttons = zip(ICONS_BOOK_EXTENSIONS, BOOK_EXTENSION_CHOICES)
         message.reply_text(
             str(self),
@@ -83,11 +113,11 @@ class SettingsExtensionChooseResponse(Response):
 class SettingsExtensionSetResponse(Response):
     template_path = "settings_extension_set.md"
 
-    def __init__(self, extension: str):
+    def __init__(self, extension):
         super().__init__()
         self.extension = extension
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.template.render(extension=self.extension)
 
 
@@ -98,11 +128,11 @@ class SettingsEmailChooseResponse(Response):
 class SettingsEmailSetResponse(Response):
     template_path = "settings_email_set.md"
 
-    def __init__(self, user: User):
+    def __init__(self, user):
         super().__init__()
         self.user = user
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.template.render(bot_email=EMAIL_LOGIN, user=self.user)
 
 
@@ -113,25 +143,25 @@ class SettingsEmailInvalidResponse(Response):
 class SearchResponse(Response):
     template_path = "search_results.md"
 
-    def __init__(self, books: Book):
+    def __init__(self, books):
         super().__init__()
         self.books = books
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.template.render(books=self.books).strip()
 
 
 class BookInfoResponse(Response):
     template_path = "book_info.md"
 
-    def __init__(self, book: Book):
+    def __init__(self, book):
         super().__init__()
         self.book = book
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.template.render(book=self.book).strip()
 
-    def serve(self, bot: Bot, message: Message) -> None:
+    def serve(self, bot, message):
         if self.book.cover_image:
             try:
                 logging.debug(
@@ -157,7 +187,7 @@ class BookInfoResponse(Response):
 class DownloadResponse(Response):
     template_path = "filename.md"
 
-    def __init__(self, book: Book):
+    def __init__(self, book):
         super().__init__()
         self.book = book
         self.ebook = book.ebook_mobi
@@ -182,20 +212,20 @@ class DownloadResponse(Response):
 class EmailSentResponse(Response):
     template_path = "email_sent.md"
 
-    def __init__(self, user: User):
+    def __init__(self, user):
         super().__init__()
         self.user = user
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.template.render(user=self.user)
 
 
 class EmailFailedResponse(Response):
     template_path = "email_failed.md"
 
-    def __init__(self, user: User):
+    def __init__(self, user):
         super().__init__()
         self.user = user
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.template.render(user=self.user)

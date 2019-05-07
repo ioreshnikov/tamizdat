@@ -3,6 +3,7 @@ from telegram.ext import (
     CallbackQueryHandler, CommandHandler, MessageHandler, RegexHandler)
 
 from .command import (
+    AuthorizeUserCommand,
     SettingsCommand, SettingsEmailChooseCommand, SettingsExtensionCommand,
     MessageCommand, BookInfoCommand, DownloadCommand, EmailCommand)
 
@@ -14,6 +15,11 @@ class TelegramBot:
             MessageHandler(
                 filters=Filters.text,
                 callback=MessageCommand(index).handle_message))
+        self.updater.dispatcher.add_handler(
+            RegexHandler(
+                pattern=r"^/authorize(\d+)",
+                callback=AuthorizeUserCommand().handle_command_regex,
+                pass_groups=True))
         self.updater.dispatcher.add_handler(
             CommandHandler(
                 "settings",
