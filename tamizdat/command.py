@@ -1,4 +1,6 @@
 import logging
+import string
+
 from validate_email import validate_email
 
 from .models import BOOK_EXTENSION_CHOICES, User
@@ -143,8 +145,10 @@ class SettingsExtensionCommand(UserCommand):
 class SearchCommand(UserCommand):
     def __init__(self, index):
         self.index = index
+        self.translator = str.maketrans(dict.fromkeys(string.punctuation))
 
     def execute(self, bot, message, search_term):
+        search_term = search_term.translate(self.translator)
         books = self.index.search(search_term)
         if not books:
             return BookNotFoundResponse()
