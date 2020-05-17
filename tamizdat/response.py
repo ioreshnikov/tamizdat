@@ -128,12 +128,12 @@ class SettingsEmailChooseResponse(Response):
 class SettingsEmailSetResponse(Response):
     template_path = "settings_email_set.md"
 
-    def __init__(self, user):
+    def __init__(self, email):
         super().__init__()
-        self.user = user
+        self.email = email
 
     def __str__(self):
-        return self.template.render(bot_email=EMAIL_LOGIN, user=self.user)
+        return self.template.render(bot_email=EMAIL_LOGIN, email=self.email)
 
 
 class SettingsEmailInvalidResponse(Response):

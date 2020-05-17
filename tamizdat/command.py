@@ -127,7 +127,7 @@ class SettingsEmailSetCommand(UserCommand):
         self.user.next_message_is_email = False
         self.user.save()
 
-        return SettingsEmailSetResponse(self.user)
+        return SettingsEmailSetResponse(self.user.email)
 
 
 class SettingsExtensionCommand(UserCommand):

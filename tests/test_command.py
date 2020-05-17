@@ -105,7 +105,7 @@ class AuthorizeUserCommandTestCase(UserCommandTestMixin, TestCase):
         self.mock_get_user.return_value = user
         user_id = fake.random.randint(100, 1000000)
         self.command.handle_command_regex(self.bot, self.update, (user_id, ))
-        self.assertTrue(user.authorized)
+        self.assertTrue(user.is_authorized)
         user.save.assert_called_with()
         MockResponse().serve.assert_called_with(self.bot, self.update.message)
 
