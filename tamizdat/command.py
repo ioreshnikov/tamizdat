@@ -3,7 +3,8 @@ import string
 
 from validate_email import validate_email
 
-from .models import BOOK_EXTENSION_CHOICES, User
+from .convert import convert_book
+from .models import User
 from .response import (
     NoResponse,
     UserNotFoundResponse,
@@ -16,8 +17,6 @@ from .response import (
     BookInfoResponse,
     DownloadResponse,
     SettingsResponse,
-    SettingsExtensionChooseResponse,
-    SettingsExtensionSetResponse,
     SettingsEmailChooseResponse,
     SettingsEmailSetResponse,
     SettingsEmailInvalidResponse)
@@ -36,30 +35,30 @@ class Command:
             return response
         return self.execute(bot, message, *args)
 
-    def handle_message(self, bot, update):
+    def handle_message(self, update, context):
         message = update.message
-        response = self.handle(bot, message, message.text)
-        return response.serve(bot, message)
+        response = self.handle(context.bot, message, message.text)
+        return response.serve(context.bot, message)
 
-    def handle_command(self, bot, update, args):
+    def handle_command(self, update, context):
         message = update.message
-        response = self.handle(bot, message, *args)
-        return response.serve(bot, message)
+        response = self.handle(context.bot, message, *context.args)
+        return response.serve(context.bot, message)
 
-    def handle_callback(self, bot, update, args):
+    def handle_callback(self, update, context):
         message = update.callback_query.message
-        response = self.handle(bot, message, *args)
-        return response.serve(bot, message)
+        response = self.handle(context.bot, message, *context.args)
+        return response.serve(context.bot, message)
 
-    def handle_command_regex(self, bot, update, groups):
+    def handle_command_regex(self, update, context):
         message = update.message
-        response = self.handle(bot, message, *groups)
-        return response.serve(bot, message)
+        response = self.handle(context.bot, message, *context.match.groups())
+        return response.serve(context.bot, message)
 
-    def handle_callback_regex(self, bot, update, groups):
+    def handle_callback_regex(self, update, context):
         message = update.callback_query.message
-        response = self.handle(bot, message, *groups)
-        return response.serve(bot, message)
+        response = self.handle(context.bot, message, *context.match.groups())
+        return response.serve(context.bot, message)
 
 
 class UserCommand(Command):
@@ -130,18 +129,6 @@ class SettingsEmailSetCommand(UserCommand):
         return SettingsEmailSetResponse(self.user.email)
 
 
-class SettingsExtensionCommand(UserCommand):
-    def execute(self, bot, message, extension=None):
-        if not extension or extension not in BOOK_EXTENSION_CHOICES:
-            return SettingsExtensionChooseResponse()
-
-        self.user.extension = extension
-        self.user.next_message_is_email = False
-        self.user.save()
-
-        return SettingsExtensionSetResponse(extension)
-
-
 class SearchCommand(UserCommand):
     def __init__(self, index):
         self.index = index
@@ -189,15 +176,19 @@ class DownloadCommand(UserCommand):
         book = self.index.get(book_id)
         if not book:
             return BookNotFoundResponse()
+
         logging.info("Asked for ebook for book_id={}".format(book_id))
-
-        if self.user.extension is None:
-            return SettingsExtensionCommand().handle(bot, message)
-
-        ebook = book.ebook_mobi
-        self.website.download_file(ebook)
-
-        return DownloadResponse(book)
+        try:
+            self.website.download_file(book.ebook_fb2)
+            if book.cover_image:
+                self.website.download_file(book.cover_image)
+            convert_book(book)
+        except Exception as error:
+            logging.error(
+                "Failed to download file: {}".format(error), exc_info=True)
+            return EmailFailedResponse(self.user)
+        else:
+            return DownloadResponse(book)
 
 
 class EmailCommand(UserCommand):
@@ -212,15 +203,10 @@ class EmailCommand(UserCommand):
         if isinstance(response, BookNotFoundResponse):
             return response
 
-        book = self.index.get(book_id)
-        if not book:
-            return BookNotFoundResponse()
-
-        if self.user.extension is None:
-            return SettingsExtensionCommand().handle(bot, message)
         if self.user.email is None:
             return SettingsEmailChooseCommand().handle(bot, message)
 
+        book = self.index.get(book_id)
         try:
             self.mailer.send(book, self.user)
         except Exception as error:

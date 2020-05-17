@@ -23,7 +23,7 @@ class Mailer:
         self.login = login
         self.password = password
 
-    def prepare_message(self, book: Book, user: User) -> MIMEMultipart:
+    def prepare_message(self, book, user):
         authors = environment.get_template("authors.md").render(book=book)
         title = book.title
         subject = "{}. {}".format(authors, title)
@@ -37,9 +37,8 @@ class Mailer:
         if book.annotation:
             message.attach(MIMEText(book.annotation))
 
-        ebook = book.ebook_mobi
-        with open(ebook.local_path, "rb") as fd:
-            filename = basename(ebook.local_path)
+        with open(book.ebook_mobi.local_path, "rb") as fd:
+            filename = basename(book.ebook_mobi.local_path)
             attachment = MIMEApplication(
                 fd.read(), Name=filename)
             attachment["Content-Disposition"] = (
@@ -48,7 +47,7 @@ class Mailer:
 
         return message
 
-    def send(self, book: Book, user: User) -> None:
+    def send(self, book, user):
         message = self.prepare_message(book, user)
         server = SMTP_SSL(self.host, self.port)
 

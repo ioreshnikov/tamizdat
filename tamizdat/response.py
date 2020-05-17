@@ -5,13 +5,12 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, TelegramError
 from telegram.parsemode import ParseMode
 from transliterate import translit
 
-from .models import BOOK_EXTENSION_CHOICES, User
+from .models import User
 from .settings import EMAIL_LOGIN
 
 
 ICON_BOOK_PILE = "📖"
 ICON_ENVELOPE = "✉"
-ICONS_BOOK_EXTENSIONS = ("📔", "📕", "📓")
 
 
 environment = Environment(
@@ -86,39 +85,9 @@ class SettingsResponse(Response):
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([[
                 InlineKeyboardButton(
-                    "{} Выбрать формат".format(ICON_BOOK_PILE),
-                    callback_data="/setextension"),
-                InlineKeyboardButton(
                     "{} Указать адрес".format(ICON_ENVELOPE),
                     callback_data="/setemail")
             ]]))
-
-
-class SettingsExtensionChooseResponse(Response):
-    template_path = "settings_extension_choose.md"
-
-    def serve(self, bot, message):
-        buttons = zip(ICONS_BOOK_EXTENSIONS, BOOK_EXTENSION_CHOICES)
-        message.reply_text(
-            str(self),
-            parse_mode=ParseMode.MARKDOWN,
-            reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton(
-                    "{} {}".format(icon, extension),
-                    callback_data="/setextension {}".format(extension))
-                for icon, extension in buttons
-            ]]))
-
-
-class SettingsExtensionSetResponse(Response):
-    template_path = "settings_extension_set.md"
-
-    def __init__(self, extension):
-        super().__init__()
-        self.extension = extension
-
-    def __str__(self):
-        return self.template.render(extension=self.extension)
 
 
 class SettingsEmailChooseResponse(Response):
