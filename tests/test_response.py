@@ -5,11 +5,10 @@ from faker import Faker
 from telegram.parsemode import ParseMode
 
 from tamizdat.models import (
-    BOOK_EXTENSION_CHOICES, make_database,
+    make_database,
     Author, Book, User)
 from tamizdat.response import (
     NewUserAdminNotification, SettingsResponse,
-    SettingsExtensionChooseResponse, SettingsExtensionSetResponse,
     SettingsEmailSetResponse, SearchResponse)
 
 
@@ -60,15 +59,13 @@ class SettingsResponseTestCase(ResponseTestCase):
     def setUp(self):
         super().setUp()
         self.user.email = fake.email()
-        self.user.extension = fake.random.choice(BOOK_EXTENSION_CHOICES)
         self.response = SettingsResponse(self.user)
 
     def test_settings_response_mentions_user_format_and_email(self):
         text = str(self.response)
         self.assertIn(self.user.email, text)
-        self.assertIn(self.user.extension, text)
 
-    def test_settings_response_shows_two_buttons(self):
+    def test_settings_response_shows_setemail_button(self):
         self.response.serve(self.bot, self.message)
 
         args, kwargs = tuple(self.message.reply_text.call_args)
@@ -78,38 +75,7 @@ class SettingsResponseTestCase(ResponseTestCase):
             for row in inline_keyboard
             for button in row
         ]
-        self.assertEqual(set(callbacks), set(["/setextension", "/setemail"]))
-
-
-class SettingsExtensionChooseResponseTestCase(ResponseTestCase):
-    def setUp(self):
-        super().setUp()
-        self.response = SettingsExtensionChooseResponse()
-
-    def test_extension_dialog_shows_button_for_every_extension(self):
-        self.response.serve(self.bot, self.message)
-
-        args, kwargs = tuple(self.message.reply_text.call_args)
-        inline_keyboard = kwargs["reply_markup"]["inline_keyboard"]
-        callbacks = [
-            button["callback_data"]
-            for row in inline_keyboard
-            for button in row
-        ]
-        self.assertEqual(set(callbacks), set([
-            "/setextension {}".format(extension)
-            for extension in BOOK_EXTENSION_CHOICES
-        ]))
-
-
-class SettingsExtensionSetResponseTestCase(ResponseTestCase):
-    def setUp(self):
-        super().setUp()
-        self.extension = fake.random.choice(BOOK_EXTENSION_CHOICES)
-        self.response = SettingsExtensionSetResponse(self.extension)
-
-    def test_extension_dialog_mentions_extension(self):
-        self.assertIn(self.extension, str(self.response))
+        self.assertEqual(set(callbacks), set(["/setemail"]))
 
 
 class SettingsEmailSetResponseTestCase(ResponseTestCase):
@@ -118,7 +84,7 @@ class SettingsEmailSetResponseTestCase(ResponseTestCase):
         self.email = fake.email()
         self.response = SettingsEmailSetResponse(self.email)
 
-    def test_extension_dialog_mentions_extension(self):
+    def test_email_dialog_mentions_email(self):
         self.assertIn(self.email, str(self.response))
 
 

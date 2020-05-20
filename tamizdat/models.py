@@ -1,21 +1,9 @@
-from enum import Enum
-
 from peewee import (
     Proxy, SqliteDatabase,
     Model, DeferredThroughModel,
     AutoField, DeferredForeignKey, ForeignKeyField, ManyToManyField,
     BooleanField, CharField, IntegerField, TextField)
 from playhouse.sqlite_ext import FTS5Model, SearchField
-
-
-BOOK_EXTENSION_EPUB = "epub"
-BOOK_EXTENSION_FB2 = "fb2"
-BOOK_EXTENSION_MOBI = "mobi"
-
-BOOK_EXTENSION_CHOICES = (
-    BOOK_EXTENSION_EPUB,
-    BOOK_EXTENSION_FB2,
-    BOOK_EXTENSION_MOBI)
 
 
 proxy = Proxy()
@@ -67,8 +55,6 @@ class Book(BaseModel):
     augmented = BooleanField(null=True, default=False)
     annotation = TextField(null=True)
     cover_image = DeferredForeignKey("File", field="file_id", null=True)
-    ebook_djvu = DeferredForeignKey("File", field="file_id", null=True)
-    ebook_epub = DeferredForeignKey("File", field="file_id", null=True)
     ebook_fb2 = DeferredForeignKey("File", field="file_id", null=True)
     ebook_mobi = DeferredForeignKey("File", field="file_id", null=True)
 
@@ -173,10 +159,9 @@ class User(BaseModel):
     next_message_is_email = BooleanField(default=False)
 
     email = CharField(null=True)
-    extension = CharField(null=True, choices=BOOK_EXTENSION_CHOICES)
 
 
-def make_database(address: str = ":memory:") -> SqliteDatabase:
+def make_database(address = ":memory:"):
     database = SqliteDatabase(address)
     proxy.initialize(database)
     database.create_tables([

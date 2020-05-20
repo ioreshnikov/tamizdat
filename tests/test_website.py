@@ -26,7 +26,7 @@ class WebsiteTestCase(TestCase):
         self.assertEqual(self.website._get_extension("/b/485688/epub"), "epub")
         self.assertEqual(self.website._get_extension("/b/485688/fb2"), "fb2")
         self.assertEqual(self.website._get_extension("/b/485688/mobi"), "mobi")
-        self.assertIsNone(self.website._get_extension("/b/485688/"))
+        self.assertEqual(self.website._get_extension("/b/485688/"), "")
 
     def test_join_paragraph(self):
         sentences = [
@@ -43,13 +43,11 @@ class WebsiteTestCase(TestCase):
 
         page_source = read_saved_page("93872")
         info = self.website._scrape_additional_info(page_source)
-        annotation, cover, downloads = info
+        annotation, cover, ebook = info
 
         self.assertIsNotNone(annotation)
         self.assertTrue(cover.endswith("jpg"))
-        self.assertTrue(downloads["epub"].endswith("epub"))
-        self.assertTrue(downloads["fb2"].endswith("fb2"))
-        self.assertTrue(downloads["mobi"].endswith("mobi"))
+        self.assertTrue(ebook.endswith("fb2"))
 
     def test_appending_additional_info(self):
         self.website.requests.head = mock_head
@@ -62,9 +60,7 @@ class WebsiteTestCase(TestCase):
 
         self.assertIsNone(book.annotation)
         self.assertIsNone(book.cover_image)
-        self.assertIsNone(book.ebook_epub)
         self.assertIsNone(book.ebook_fb2)
-        self.assertIsNone(book.ebook_mobi)
 
         self.website._append_additional_info(book, info)
 
@@ -73,14 +69,6 @@ class WebsiteTestCase(TestCase):
         self.assertIsInstance(book.cover_image, File)
         self.assertTrue(book.cover_image.remote_url.endswith(".jpg"))
 
-        self.assertIsInstance(book.ebook_epub, File)
-        self.assertTrue(book.ebook_epub.remote_url.endswith("/epub"))
-        self.assertTrue(book.ebook_epub.local_path.endswith(".epub"))
-
         self.assertIsInstance(book.ebook_fb2, File)
         self.assertTrue(book.ebook_fb2.remote_url.endswith("/fb2"))
         self.assertTrue(book.ebook_fb2.local_path.endswith(".fb2"))
-
-        self.assertIsInstance(book.ebook_mobi, File)
-        self.assertTrue(book.ebook_mobi.remote_url.endswith("/mobi"))
-        self.assertTrue(book.ebook_mobi.local_path.endswith(".mobi"))

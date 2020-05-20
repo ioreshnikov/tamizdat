@@ -1,3 +1,4 @@
+import logging
 import random
 from unittest import TestCase
 
@@ -10,6 +11,9 @@ from .fixtures import (
     CATALOG_BROKEN_HEADER, CATALOG_PROPER_HEADER,
     fake_card, fake_cards, fake_cards_with_author_duplicates,
     store_catalog, fake_catalog, fake_catalog_with_author_duplicates)
+
+
+logging.disable(logging.CRITICAL)
 
 
 class IndexTestCase(TestCase):

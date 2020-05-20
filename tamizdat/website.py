@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from lxml import html
 import requests
 
-from .models import BOOK_EXTENSION_CHOICES, File
+from .models import File
 
 
 XPATH_ANNOTATION_TEXT = "//h2[text()='Аннотация']/following-sibling::p//text()"
@@ -31,9 +31,7 @@ class Website:
     @staticmethod
     def _get_extension(href):
         *_, extension = path.split(href)
-        if extension in BOOK_EXTENSION_CHOICES:
-            return extension
-        return None
+        return extension
 
     @staticmethod
     def _join_paragraph(sentences):
@@ -61,20 +59,19 @@ class Website:
             if cover_image_url
             else None)
 
-        download_links = {
-            self._get_extension(link): link
-            for link in download_links
-            if self._get_extension(link)
-        }
+        ebook_url = None
+        for link in download_links:
+            if self._get_extension(link) == "fb2":
+                ebook_url = link
 
-        return annotation_text, cover_image_url, download_links
+        return annotation_text, cover_image_url, ebook_url
 
     def _append_additional_info(self, book, info):
         logging.info(
             "Appending additional info for book_id={}"
             .format(book.book_id))
 
-        annotation, cover_image_url, download_links = info
+        annotation, cover_image_url, ebook_url = info
 
         if annotation:
             logging.debug("Setting annotation")
@@ -82,17 +79,19 @@ class Website:
 
         if cover_image_url:
             logging.debug("Setting cover image")
-            cover_image = File(remote_url=cover_image_url)
+            _, ext = path.splitext(cover_image_url)
+            cover_image = File(
+                remote_url=cover_image_url,
+                local_path="{}{}".format(book.book_id, ext))
             cover_image.save()
             book.cover_image = cover_image
 
-        for extension, url in download_links.items():
-            logging.debug("Setting {} ebook".format(extension))
-            ebook = File(
-                remote_url=url,
-                local_path="{}.{}".format(book.book_id, extension))
-            ebook.save()
-            setattr(book, "ebook_{}".format(extension), ebook)
+        logging.debug("Setting ebook")
+        ebook = File(
+            remote_url=ebook_url,
+            local_path="{}.fb2".format(book.book_id))
+        ebook.save()
+        book.ebook_fb2 = ebook
 
     def fetch_additional_info(self, book):
         if book.augmented:
@@ -116,7 +115,7 @@ class Website:
         book.augmented = True
         book.save()
 
-    def download(self, url: str, filename: str):
+    def download(self, url, filename):
         url = self._url(url)
 
         logging.debug("Saving {} to {}".format(url, filename))
@@ -124,7 +123,7 @@ class Website:
             with open(filename, "wb") as fd:
                 fd.write(response.content)
 
-    def download_file(self, file_: File):
+    def download_file(self, file_):
         remote_url = file_.remote_url
         local_path = file_.local_path
 
@@ -132,4 +131,5 @@ class Website:
             logging.debug("We don't have the file on disk.")
             self.download(remote_url, local_path)
             logging.debug("File downloaded!")
+            local_path = file_.local_path
             file_.save()

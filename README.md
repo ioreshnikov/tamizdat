@@ -27,11 +27,17 @@ To run the bot you first need to import the website catalog. You can get it at h
     $ wget http://flibusta.is/catalog/catalog.zip
     $ unzip catalog.zip
 
-This will create a 60 megabyte text file called `catalog.txt` in you working directory. To import it simply run `tamizdat import catalog.txt`. The command will parse the catalog and put all the library information into an sqlite3 database with a search index of the library cards. You are now ready to start the bot. Simply launch
+This will create a 60 megabyte text file called `catalog.txt` in you working directory. To import it simply run
+
+    $ tamizdat import catalog.txt
+
+The command will parse the catalog and put all the library information into an sqlite3 database with a search index of the library cards. You are now almost ready to start the bot. But first you have to create an admin user. This can be done by running
+
+    $ tamizdat admin <admin_id>
+
+where `admin_id` is the telegram id of your bot admin. That's it, you can start your bot now. This is done by executing
 
     $ tamizdat bot
-
-and you are done.
 
 Supported commands
 ------------------
@@ -39,7 +45,6 @@ Supported commands
 Currently, the bot supports the following list of commands:
 
 * **settings** -- Show the profile settings
-* **setextension** -- Set preferred ebook extension
 * **setemail** -- Set your email address
 * **info** *000000* -- Show the book info given the id
 * **download** *000000* -- Download the ebook

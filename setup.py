@@ -7,7 +7,7 @@ with open("README.md") as fd:
 
 setup(
     name="tamizdat",
-    version="0.0.0",
+    version="0.2.0",
     description="flibusta.net indexing and email delivery service",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -20,7 +20,7 @@ setup(
     install_requires=[
         "jinja2",
         "lxml",
-        "python-telegram-bot",
+        "python-telegram-bot>=12.0",
         "py3-validate-email",
         "peewee",
         "requests",
