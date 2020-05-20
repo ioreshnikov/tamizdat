@@ -89,7 +89,7 @@ class Website:
         logging.debug("Setting ebook")
         ebook = File(
             remote_url=ebook_url,
-            local_path="{}.fb2".format(book.book_id))
+            local_path="{}.fb2.zip".format(book.book_id))
         ebook.save()
         book.ebook_fb2 = ebook
 

@@ -27,7 +27,7 @@ class ConvertTestCase(TestCase):
 
         book = Mock()
         book_id = fake.random.randint(100, 1000000)
-        book.ebook_fb2.local_path = "{}.fb2".format(book_id)
+        book.ebook_fb2.local_path = "{}.fb2.zip".format(book_id)
         mock_path_exists.return_value = False
 
         convert_book(book)
@@ -52,7 +52,7 @@ class ConvertTestCase(TestCase):
 
         book = Mock()
         book_id = fake.random.randint(100, 1000000)
-        book.ebook_fb2.local_path = "{}.fb2".format(book_id)
+        book.ebook_fb2.local_path = "{}.fb2.zip".format(book_id)
         mock_path_exists.return_value = False
         mock_prepare_cover.return_value = None
 

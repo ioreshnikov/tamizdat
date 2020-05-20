@@ -30,7 +30,7 @@ def prepare_cover(book):
 
 def convert_book(book):
     """
-    Converts an ebook from .fb2 to .mobi with some extra enhancements.
+    Converts an ebook from .fb2.zip to .mobi with some extra enhancements.
 
     :param book: a Book instance.
     """
@@ -40,7 +40,7 @@ def convert_book(book):
         return
 
     input_path = book.ebook_fb2.local_path
-    basename, _ = os.path.splitext(input_path)
+    basename, _ = input_path.split(os.extsep, 1)
     output_path = "{}.mobi".format(basename)
 
     command = [

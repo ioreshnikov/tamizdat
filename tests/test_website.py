@@ -71,4 +71,4 @@ class WebsiteTestCase(TestCase):
 
         self.assertIsInstance(book.ebook_fb2, File)
         self.assertTrue(book.ebook_fb2.remote_url.endswith("/fb2"))
-        self.assertTrue(book.ebook_fb2.local_path.endswith(".fb2"))
+        self.assertTrue(book.ebook_fb2.local_path.endswith(".fb2.zip"))
