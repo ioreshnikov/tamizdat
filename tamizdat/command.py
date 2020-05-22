@@ -311,9 +311,6 @@ class SettingsEmailSetCommand(UserCommand):
 class SearchCommand(UserCommand):
     """
     Search for books in the database.
-
-    :param index: the database index object.
-    :type index: :class:`Index`.
     """
 
     def __init__(self, index):
@@ -321,7 +318,7 @@ class SearchCommand(UserCommand):
         Instantiate the command.
 
         :param index: the database index object.
-        :type index: :class:`Index`.
+        :type index: :class:`tamizdat.index.Index`.
         """
         self.index = index
         self.translator = str.maketrans(dict.fromkeys(string.punctuation))
@@ -359,7 +356,7 @@ class MessageCommand(UserCommand):
         Instantiate the command.
 
         :param index: the database index object.
-        :type index: :class:`Index`.
+        :type index: :class:`tamizdat.index.Index`.
         """
         self.search_command = SearchCommand(index)
         self.settings_email_set_command = SettingsEmailSetCommand()
@@ -395,8 +392,8 @@ class BookInfoCommand(UserCommand):
         :param index: the database index object.
         :param webiste: the website object.
 
-        :type index: :class:`Index`
-        :type website: :class:`Website`
+        :type index: :class:`tamizdat.index.Index`
+        :type website: :class:`tamizdat.website.Website`
         """
         self.index = index
         self.website = website
@@ -431,8 +428,8 @@ class DownloadCommand(UserCommand):
         :param index: the database index object.
         :param webiste: the website object.
 
-        :type index: :class:`Index`
-        :type website: :class:`Website`
+        :type index: :class:`tamizdat.index.Index`
+        :type website: :class:`tamizdat.website.Website`
         """
         self.index = index
         self.website = website
@@ -479,9 +476,9 @@ class EmailCommand(UserCommand):
         :param webiste: the website object.
         :param mailer: the mailer object.
 
-        :type index: :class:`Index`
-        :type website: :class:`Website`
-        :type mailer: :class:`Mailer`
+        :type index: :class:`tamizdat.index.Index`
+        :type website: :class:`tamizdat.website.Website`
+        :type mailer: :class:`tamizdat.email.Mailer`
         """
         self.index = index
         self.website = website

@@ -1,3 +1,12 @@
+"""
+Convertion routines
+-------------------
+
+This module defines the file conversion routines.
+
+:author: Ivan Oreshnikov <oreshnikov.ivan@gmail.com>
+"""
+
 import logging
 import os
 import subprocess
