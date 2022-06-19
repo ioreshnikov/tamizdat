@@ -56,7 +56,7 @@ class Book(BaseModel):
     annotation = TextField(null=True)
     cover_image = DeferredForeignKey("File", field="file_id", null=True)
     ebook_fb2 = DeferredForeignKey("File", field="file_id", null=True)
-    ebook_mobi = DeferredForeignKey("File", field="file_id", null=True)
+    ebook_epub = DeferredForeignKey("File", field="file_id", null=True)
 
     def __repr__(self):
         return "Book({!r}, {!r}, {!r}, {!r}, {!r}, {!r}, ...)".format(

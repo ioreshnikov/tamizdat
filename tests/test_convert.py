@@ -42,7 +42,7 @@ class ConvertTestCase(TestCase):
 
         self.assertEqual(command, "ebook-convert")
         self.assertEqual(input_file, book.ebook_fb2.local_path)
-        self.assertEqual(output_file, "{}.mobi".format(book_id))
+        self.assertEqual(output_file, "{}.epub".format(book_id))
 
     @patch("tamizdat.convert.prepare_cover")
     @patch("subprocess.check_call")

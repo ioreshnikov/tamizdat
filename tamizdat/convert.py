@@ -30,18 +30,18 @@ def prepare_cover(book):
 
 def convert_book(book):
     """
-    Converts an ebook from .fb2.zip to .mobi with some extra enhancements.
+    Converts an ebook from .fb2.zip to .epub with some extra enhancements.
 
     :param book: a Book instance.
     """
 
-    if book.ebook_mobi is not None and os.path.exists(book.ebook_mobi.local_path):
+    if book.ebook_epub is not None and os.path.exists(book.ebook_epub.local_path):
         logging.info("Converted book already exists. Doing nothing.")
         return
 
     input_path = book.ebook_fb2.local_path
     basename, _ = input_path.split(os.extsep, 1)
-    output_path = "{}.mobi".format(basename)
+    output_path = "{}.epub".format(basename)
 
     command = [
         "ebook-convert", input_path, output_path,
@@ -60,6 +60,6 @@ def convert_book(book):
 
     logging.info("Conversion to {} done!".format(output_path))
 
-    book.ebook_mobi = File(local_path=output_path)
-    book.ebook_mobi.save()
+    book.ebook_epub = File(local_path=output_path)
+    book.ebook_epub.save()
     book.save()
