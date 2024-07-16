@@ -47,7 +47,7 @@ class WebsiteTestCase(TestCase):
 
         self.assertIsNotNone(annotation)
         self.assertTrue(cover.endswith("jpg"))
-        self.assertTrue(ebook.endswith("fb2"))
+        self.assertTrue(ebook.endswith("epub"))
 
     def test_appending_additional_info(self):
         self.website.requests.head = mock_head
@@ -60,7 +60,7 @@ class WebsiteTestCase(TestCase):
 
         self.assertIsNone(book.annotation)
         self.assertIsNone(book.cover_image)
-        self.assertIsNone(book.ebook_fb2)
+        self.assertIsNone(book.ebook_epub)
 
         self.website._append_additional_info(book, info)
 
@@ -69,6 +69,6 @@ class WebsiteTestCase(TestCase):
         self.assertIsInstance(book.cover_image, File)
         self.assertTrue(book.cover_image.remote_url.endswith(".jpg"))
 
-        self.assertIsInstance(book.ebook_fb2, File)
-        self.assertTrue(book.ebook_fb2.remote_url.endswith("/fb2"))
-        self.assertTrue(book.ebook_fb2.local_path.endswith(".fb2.zip"))
+        self.assertIsInstance(book.ebook_epub, File)
+        self.assertTrue(book.ebook_epub.remote_url.endswith("/epub"))
+        self.assertTrue(book.ebook_epub.local_path.endswith(".epub"))

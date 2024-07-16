@@ -55,7 +55,6 @@ class Book(BaseModel):
     augmented = BooleanField(null=True, default=False)
     annotation = TextField(null=True)
     cover_image = DeferredForeignKey("File", field="file_id", null=True)
-    ebook_fb2 = DeferredForeignKey("File", field="file_id", null=True)
     ebook_epub = DeferredForeignKey("File", field="file_id", null=True)
 
     def __repr__(self):

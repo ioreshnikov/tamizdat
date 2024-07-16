@@ -61,7 +61,7 @@ class Website:
 
         ebook_url = None
         for link in download_links:
-            if self._get_extension(link) == "fb2":
+            if self._get_extension(link) == "epub":
                 ebook_url = link
 
         return annotation_text, cover_image_url, ebook_url
@@ -89,9 +89,9 @@ class Website:
         logging.debug("Setting ebook")
         ebook = File(
             remote_url=ebook_url,
-            local_path="{}.fb2.zip".format(book.book_id))
+            local_path="{}.epub".format(book.book_id))
         ebook.save()
-        book.ebook_fb2 = ebook
+        book.ebook_epub = ebook
 
     def fetch_additional_info(self, book):
         if book.augmented:

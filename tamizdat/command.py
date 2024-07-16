@@ -3,7 +3,6 @@ import string
 
 from validate_email import validate_email
 
-from .convert import convert_book
 from .models import User
 from .response import (
     NoResponse,
@@ -179,10 +178,9 @@ class DownloadCommand(UserCommand):
 
         logging.info("Asked for ebook for book_id={}".format(book_id))
         try:
-            self.website.download_file(book.ebook_fb2)
+            self.website.download_file(book.ebook_epub)
             if book.cover_image:
                 self.website.download_file(book.cover_image)
-            convert_book(book)
         except Exception as error:
             logging.error(
                 "Failed to download file: {}".format(error), exc_info=True)
