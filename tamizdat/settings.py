@@ -1,6 +1,9 @@
-EMAIL_LOGIN = "tamizdatbot@example.com"
-EMAIL_PASSWORD = "secret email password"
-EMAIL_HOST = "stmp.example.com"
-EMAIL_PORT = 465
+import os
 
-TELEGRAM_TOKEN = "secret telegram token"
+EMAIL_LOGIN = os.getenv("TAMIZDAT_EMAIL_LOGIN")
+EMAIL_PASSWORD = os.getenv("TAMIZDAT_EMAIL_PASSWORD")
+EMAIL_HOST = os.getenv("TAMIZDAT_EMAIL_HOST")
+EMAIL_PORT = os.getenv("TAMIZDAT_EMAIL_PORT")
+
+TELEGRAM_TOKEN = os.getenv("TAMIZDAT_TELEGRAM_TOKEN")
+
