@@ -7,9 +7,6 @@ _[Wikipedia](https://en.wikipedia.org/wiki/Samizdat)_
 
 Tamizdat is a telegram bot that allows you to search `flibusta.net` library and to deliver the books you want from there to an email address of your choice. The main use-case for that is to send the books from the library to your Kindle device via an Amazon email address.
 
-[![Build Status](https://travis-ci.org/ioreshnikov/tamizdat.svg?branch=master)](https://travis-ci.org/ioreshnikov/tamizdat)
-[![Code Coverage](https://codecov.io/gh/ioreshnikov/tamizdat/branch/master/graph/badge.svg)](https://codecov.io/gh/ioreshnikov/tamizdat/branch/master/)
-
 Installation
 ------------
 

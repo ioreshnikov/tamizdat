@@ -260,9 +260,8 @@ class DownloadCommandTestCase(UserCommandTestMixin, TestCase):
         self.website = Mock()
         self.command = DownloadCommand(self.index, self.website)
 
-    @patch("tamizdat.command.convert_book")
     @patch("tamizdat.command.DownloadResponse")
-    def test_download_command_downloads_a_book_if_found(self, MockResponse, mock_convert_book):
+    def test_download_command_downloads_a_book_if_found(self, MockResponse):
         book_id = fake.random.randint(100, 100000)
         book = Mock()
 
@@ -272,8 +271,7 @@ class DownloadCommandTestCase(UserCommandTestMixin, TestCase):
         self.command.handle_command_regex(self.update, self.context)
 
         self.website.download_file.assert_has_calls(
-            [call(book.ebook_fb2), call(book.cover_image)])
-        mock_convert_book.assert_called_with(book)
+            [call(book.ebook_epub), call(book.cover_image)])
 
         MockResponse(book).serve.assert_called_with(self.context.bot, self.update.message)
 
@@ -287,9 +285,8 @@ class DownloadCommandTestCase(UserCommandTestMixin, TestCase):
         self.command.handle_command_regex(self.update, self.context)
         MockResponse().serve.assert_called_with(self.context.bot, self.update.message)
 
-    @patch("tamizdat.command.convert_book")
     @patch("tamizdat.command.DownloadResponse")
-    def test_download_command_skips_cover_if_not_defined(self, MockResponse, mock_convert_book):
+    def test_download_command_skips_cover_if_not_defined(self, MockResponse):
         book_id = fake.random.randint(100, 100000)
         book = Mock()
         book.cover_image = None
@@ -302,7 +299,6 @@ class DownloadCommandTestCase(UserCommandTestMixin, TestCase):
         # A clunky way to assert that something _was not_ called.
         with self.assertRaises(AssertionError):
             self.website.download_file.assert_called_with(book.cover_image)
-        mock_convert_book.assert_called_with(book)
 
         MockResponse(book).serve.assert_called_with(self.context.bot, self.update.message)
 
