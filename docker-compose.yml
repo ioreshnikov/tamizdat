@@ -1,8 +1,9 @@
-version: '3.8'
+version: "3.8"
 
 services:
   bot:
+    env_file: "tamizdat.env"
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: "Dockerfile"
     restart: unless-stopped
