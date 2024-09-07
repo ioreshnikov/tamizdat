@@ -19,6 +19,7 @@ from .response import (
     SettingsEmailChooseResponse,
     SettingsEmailSetResponse,
     SettingsEmailInvalidResponse)
+from .system import stop_bot
 
 
 class Command:
@@ -86,6 +87,9 @@ class AdminCommand(UserCommand):
     def prepare(self, bot, message):
         user = self.get_user(user_id=message.chat.id)
         if not user or not user.is_admin:
+            logging.error(
+                "Admin command {} from user {} not executed"
+                .format(message.text, message.chat.id))
             return NoResponse()
 
         self.user = user
@@ -213,3 +217,8 @@ class EmailCommand(UserCommand):
             return EmailFailedResponse(self.user)
         else:
             return EmailSentResponse(self.user)
+
+
+class RestartCommand(AdminCommand):
+    def execute(self, *_):
+        stop_bot()

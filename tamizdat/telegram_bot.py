@@ -4,6 +4,7 @@ from telegram.ext import (
 
 from .command import (
     AuthorizeUserCommand,
+    RestartCommand,
     SettingsCommand, SettingsEmailChooseCommand,
     MessageCommand, BookInfoCommand, DownloadCommand, EmailCommand)
 
@@ -62,6 +63,11 @@ class TelegramBot:
                 pattern=r"^/email (\d+)",
                 callback=EmailCommand(
                     index, website, mailer).handle_callback_regex))
+
+        self.updater.dispatcher.add_handler(
+            CommandHandler(
+                "restart",
+                callback=RestartCommand().handle_message))
 
         self.updater.dispatcher.add_handler(
             MessageHandler(
