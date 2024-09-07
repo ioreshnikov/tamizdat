@@ -20,7 +20,7 @@ setup(
     install_requires=[
         "jinja2",
         "lxml",
-        "python-telegram-bot>=12.0",
+        "python-telegram-bot==12.8",
         "py3-validate-email",
         "peewee",
         "requests",

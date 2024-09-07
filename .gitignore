@@ -106,3 +106,4 @@ venv.bak/
 *.mobi
 *.sqlite3
 *.pem
+*.env
