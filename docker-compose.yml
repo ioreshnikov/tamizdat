@@ -6,4 +6,6 @@ services:
     build:
       context: .
       dockerfile: "Dockerfile"
+    volumes:
+      - ./data:/tamizdat/data
     restart: unless-stopped

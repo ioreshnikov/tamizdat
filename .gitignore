@@ -103,7 +103,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-*.mobi
-*.sqlite3
 *.pem
 *.env
+
+data/
