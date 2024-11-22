@@ -13,8 +13,8 @@ class Mailer:
         self,
         login: str,
         password: str,
-        host: str = "stmp.google.com",
-        port: int = 587,
+        host: str,
+        port: int,
     ):
         self.host = host
         self.port = port
