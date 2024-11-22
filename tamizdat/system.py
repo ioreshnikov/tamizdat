@@ -1,5 +1,12 @@
-import sys
+import threading
+
+from telegram.ext.updater import Updater
 
 
-def stop_bot():
-    sys.exit(0)
+def shutdown(updater: Updater):
+    updater.stop()
+    updater.is_idle = False
+
+
+def stop_bot(updater: Updater):
+    threading.Thread(target=shutdown, args=(updater, )).start()

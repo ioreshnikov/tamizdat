@@ -67,7 +67,7 @@ class TelegramBot:
         self.updater.dispatcher.add_handler(
             CommandHandler(
                 "restart",
-                callback=RestartCommand().handle_message))
+                callback=RestartCommand(self.updater).handle_message))
 
         self.updater.dispatcher.add_handler(
             MessageHandler(

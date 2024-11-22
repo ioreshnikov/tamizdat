@@ -1,5 +1,6 @@
 import logging
 import string
+from telegram.ext.updater import Updater
 
 from validate_email import validate_email
 
@@ -220,5 +221,9 @@ class EmailCommand(UserCommand):
 
 
 class RestartCommand(AdminCommand):
+    def __init__(self, updater: Updater):
+        self.updater = updater
+
     def execute(self, *_):
-        stop_bot()
+        logging.info("Received restart command. Exiting")
+        stop_bot(self.updater)
