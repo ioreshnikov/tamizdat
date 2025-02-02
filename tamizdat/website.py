@@ -1,6 +1,7 @@
 import logging
 from os import path
 from urllib.parse import urljoin
+from importlib import resources
 
 from lxml import html
 import requests
@@ -9,20 +10,20 @@ from .models import File
 
 
 XPATH_ANNOTATION_TEXT = "//h2[text()='Аннотация']/following-sibling::p//text()"
-
 XPATH_COVER_IMAGE_URL = "//img[@title='Cover image']/@src"
-
 XPATH_DOWNLOAD_LINKS = "//a[text()='(читать)']/following-sibling::a/@href"
 
 
 class Website:
     def __init__(
         self,
+        ebook_dir,
         baseurl="http://flibusta.net",
         book_url_format="{baseurl}/b/{id}",
         encoding="utf-8",
         requests=requests
     ):
+        self.ebook_dir = ebook_dir
         self.baseurl = baseurl
         self.book_url_format = book_url_format
         self.encoding = encoding
@@ -82,14 +83,14 @@ class Website:
             _, ext = path.splitext(cover_image_url)
             cover_image = File(
                 remote_url=cover_image_url,
-                local_path="{}{}".format(book.book_id, ext))
+                local_path=path.join(self.ebook_dir, "{}{}".format(book.book_id, ext)))
             cover_image.save()
             book.cover_image = cover_image
 
         logging.debug("Setting ebook")
         ebook = File(
             remote_url=ebook_url,
-            local_path="{}.epub".format(book.book_id))
+            local_path=path.join(self.ebook_dir, "{}.epub".format(book.book_id)))
         ebook.save()
         book.ebook_epub = ebook
 

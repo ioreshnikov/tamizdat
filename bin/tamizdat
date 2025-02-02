@@ -3,6 +3,7 @@
 
 import logging
 from argparse import ArgumentParser
+from importlib import resources
 
 from tamizdat import settings
 from tamizdat.email import Mailer
@@ -15,8 +16,13 @@ from tamizdat.website import Website
 parser = ArgumentParser()
 parser.add_argument(
     "--database",
-    default="index.sqlite3",
-    help="Path to the catalog database",
+    help="Path to the sqlite database",
+    required=True,
+    type=str)
+parser.add_argument(
+    "--ebook_dir",
+    help="Path to the ebooks directory",
+    required=True,
     type=str)
 
 subparsers = parser.add_subparsers(
@@ -47,7 +53,7 @@ parser_bot_start = subparsers.add_parser(
 args = parser.parse_args()
 database = make_database(args.database)
 index = Index(database)
-website = Website()
+website = Website(args.ebook_dir)
 
 
 logging.basicConfig(

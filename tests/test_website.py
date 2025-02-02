@@ -1,5 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
+from tempfile import mkdtemp
+from os import rmdir
 
 from tamizdat.models import make_database, Book, File
 from tamizdat.website import Website
@@ -20,7 +22,11 @@ def mock_head(url, *args, **kwargs):
 class WebsiteTestCase(TestCase):
     def setUp(self):
         self.database = make_database()
-        self.website = Website(requests=MagicMock())
+        self.tmpdir = mkdtemp()
+        self.website = Website(self.tmpdir, requests=MagicMock())
+
+    def tearDown(self):
+        rmdir(self.tmpdir)
 
     def test_get_extension(self):
         self.assertEqual(self.website._get_extension("/b/485688/epub"), "epub")

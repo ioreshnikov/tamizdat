@@ -110,7 +110,6 @@ class SearchResponseTestCase(ResponseTestCase):
     def test_minimal_book_info_is_shown_in_search_result(self):
         text = str(self.response)
         for book in self.books:
-            print(list(book.authors))
             self.assertIn(book.title, text)
             self.assertIn(book.subtitle, text)
             self.assertIn(book.authors[0].first_name, text)
