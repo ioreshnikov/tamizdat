@@ -1,0 +1,8 @@
+<b>{{ book.title }}</b>
+{% if book.subtitle -%}
+  {{ book.subtitle }}
+{% endif %}
+<i>{% include "authors.html" %}</i>{% if book.year or book.language.lower() != "ru" or book.series %}
+
+Издание{% if book.year %} {{ book.year }} года{% endif %}{% if book.language.lower() != "ru" %} на {% include "language.html" %}{% endif %}{% if book.series %} из серии <i>{{book.series}}</i>{% endif %}
+{% endif %}

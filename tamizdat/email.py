@@ -22,7 +22,7 @@ class Mailer:
         self.password = password
 
     def prepare_message(self, book, user):
-        authors = environment.get_template("authors.md").render(book=book)
+        authors = environment.get_template("authors.html").render(book=book)
         title = book.title
         subject = "{}. {}".format(authors, title)
 
@@ -35,8 +35,8 @@ class Mailer:
         if book.annotation:
             message.attach(MIMEText(book.annotation))
 
-        with open(book.ebook_mobi.local_path, "rb") as fd:
-            filename = basename(book.ebook_mobi.local_path)
+        with open(book.ebook_epub.local_path, "rb") as fd:
+            filename = basename(book.ebook_epub.local_path)
             attachment = MIMEApplication(
                 fd.read(), Name=filename)
             attachment["Content-Disposition"] = (

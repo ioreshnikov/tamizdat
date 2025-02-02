@@ -7,5 +7,5 @@ services:
       context: .
       dockerfile: "Dockerfile"
     volumes:
-      - ./:/tamizdat
+      - ./data:/tamizdat/data
     restart: unless-stopped

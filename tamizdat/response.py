@@ -34,20 +34,20 @@ class Response:
     def __str__(self):
         return self.template.render()
 
-    def serve(self, bot, message):
-        return message.reply_text(str(self), parse_mode=ParseMode.MARKDOWN)
+    def serve(self, _bot, message):
+        return message.reply_text(str(self), parse_mode=ParseMode.HTML)
 
 
 class UserNotFoundResponse(Response):
-    template_path = "user_not_found.md"
+    template_path = "user_not_found.html"
 
 
 class UserAuthorizedResponse(Response):
-    template_path = "user_authorized.md"
+    template_path = "user_authorized.html"
 
 
 class NewUserAdminNotification(Response):
-    template_path = "new_user.md"
+    template_path = "new_user.html"
 
     def __init__(self, user):
         super().__init__()
@@ -62,15 +62,15 @@ class NewUserAdminNotification(Response):
             bot.send_message(
                 admin.user_id,
                 str(self),
-                parse_mode=ParseMode.MARKDOWN)
+                parse_mode=ParseMode.HTML)
 
 
 class BookNotFoundResponse(Response):
-    template_path = "book_not_found.md"
+    template_path = "book_not_found.html"
 
 
 class SettingsResponse(Response):
-    template_path = "settings.md"
+    template_path = "settings.html"
 
     def __init__(self, user):
         super().__init__()
@@ -82,7 +82,7 @@ class SettingsResponse(Response):
     def serve(self, bot, message):
         message.reply_text(
             str(self),
-            parse_mode=ParseMode.MARKDOWN,
+            parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup([[
                 InlineKeyboardButton(
                     "{} Указать адрес".format(ICON_ENVELOPE),
@@ -91,11 +91,11 @@ class SettingsResponse(Response):
 
 
 class SettingsEmailChooseResponse(Response):
-    template_path = "settings_email_choose.md"
+    template_path = "settings_email_choose.html"
 
 
 class SettingsEmailSetResponse(Response):
-    template_path = "settings_email_set.md"
+    template_path = "settings_email_set.html"
 
     def __init__(self, email):
         super().__init__()
@@ -106,11 +106,11 @@ class SettingsEmailSetResponse(Response):
 
 
 class SettingsEmailInvalidResponse(Response):
-    template_path = "settings_email_invalid.md"
+    template_path = "settings_email_invalid.html"
 
 
 class SearchResponse(Response):
-    template_path = "search_results.md"
+    template_path = "search_results.html"
 
     def __init__(self, books):
         super().__init__()
@@ -121,7 +121,7 @@ class SearchResponse(Response):
 
 
 class BookInfoResponse(Response):
-    template_path = "book_info.md"
+    template_path = "book_info.html"
 
     def __init__(self, book):
         super().__init__()
@@ -142,7 +142,7 @@ class BookInfoResponse(Response):
 
         message.reply_text(
             str(self),
-            parse_mode=ParseMode.MARKDOWN,
+            parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup([[
                 InlineKeyboardButton(
                     "{} Скачать".format(ICON_BOOK_PILE),
@@ -154,12 +154,12 @@ class BookInfoResponse(Response):
 
 
 class DownloadResponse(Response):
-    template_path = "filename.md"
+    template_path = "filename.html"
 
     def __init__(self, book):
         super().__init__()
         self.book = book
-        self.ebook = book.ebook_mobi
+        self.ebook = book.ebook_epub
 
     def serve(self, bot, message):
         if self.ebook.telegram_id:
@@ -179,7 +179,7 @@ class DownloadResponse(Response):
 
 
 class EmailSentResponse(Response):
-    template_path = "email_sent.md"
+    template_path = "email_sent.html"
 
     def __init__(self, user):
         super().__init__()
@@ -190,7 +190,7 @@ class EmailSentResponse(Response):
 
 
 class EmailFailedResponse(Response):
-    template_path = "email_failed.md"
+    template_path = "email_failed.html"
 
     def __init__(self, user):
         super().__init__()

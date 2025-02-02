@@ -52,7 +52,7 @@ class NewUserAdminNotificationTestCase(ResponseTestCase):
             self.bot.send_message.assert_any_call(
                 admin.user_id,
                 str(self.response),
-                parse_mode=ParseMode.MARKDOWN)
+                parse_mode=ParseMode.HTML)
 
 
 class SettingsResponseTestCase(ResponseTestCase):

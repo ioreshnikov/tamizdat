@@ -31,7 +31,7 @@ setup(
 
     packages=find_packages(exclude=("tests",)),
     package_data={
-        "tamizdat": ["templates/*.md"]
+        "tamizdat": ["templates/*.html"]
     },
     scripts=["bin/tamizdat"],
     include_package_data=True,

@@ -1,7 +1,7 @@
 {% if book.authors %}
-  {% set author = book.authors[0] %}{% include "author.md" %}
+  {% set author = book.authors[0] %}{% include "author.html" %}
 {% endif %}
 {% for author in book.authors[1:2] -%}
-  , {% include "author.md" %}
+  , {% include "author.html" %}
 {% endfor %}
 {% if book.authors | length > 2 %} и другие{%- endif %}
