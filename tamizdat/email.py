@@ -47,8 +47,9 @@ class Mailer:
 
     def send(self, book, user):
         message = self.prepare_message(book, user)
-        server = SMTP_SSL(self.host, self.port)
 
+        server = SMTP_SSL(self.host, self.port)
+        server.connect()
         server.ehlo()
         server.login(self.login, self.password)
         server.sendmail(self.login, user.email, str(message))

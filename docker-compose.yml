@@ -8,4 +8,5 @@ services:
       dockerfile: "Dockerfile"
     volumes:
       - ./data:/tamizdat/data
+    network_mode: "host"
     restart: unless-stopped
